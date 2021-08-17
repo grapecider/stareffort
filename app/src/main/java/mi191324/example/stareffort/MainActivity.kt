@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import java.util.UUID
+import android.content.Intent
+import android.widget.Button
 
 
 class MainActivity : AppCompatActivity() {
@@ -38,10 +40,35 @@ class MainActivity : AppCompatActivity() {
             Log.d("TAG", "２回以降の起動")
             //IDが作成されていなかった場合のID作成
             //if (uuid == "null") {
-                //edit.putString("uuid", UUID.randomUUID().toString())
-                    //.apply()
+            //edit.putString("uuid", UUID.randomUUID().toString())
+            //.apply()
             //}
             //Log.d("ID", uuid)
+            //１）Viewの取得
+        }
+        val myrecord: Button = findViewById(R.id.myrecord)
+
+        //２）ボタンを押したら次の画面へ
+        myrecord.setOnClickListener {
+            val intent = Intent(this, MyrecordActivity::class.java)
+            startActivity(intent)
+
+            val friendrecord: Button = findViewById(R.id.friendsrecord)
+
+            //3）ボタンを押したら次の画面へ
+            friendrecord.setOnClickListener {
+                val intent = Intent(this, FriendrecordActivity::class.java)
+                startActivity(intent)
+
+                val setting: Button = findViewById(R.id.setting)
+
+                //4）ボタンを押したら次の画面へ
+                setting.setOnClickListener {
+                    val intent = Intent(this, SettingActivity::class.java)
+                    startActivity(intent)
+
+                }
+            }
         }
     }
 }
