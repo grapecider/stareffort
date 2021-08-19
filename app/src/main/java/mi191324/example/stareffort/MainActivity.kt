@@ -12,19 +12,18 @@ import java.util.UUID
 import android.content.Intent
 import android.widget.Button
 
-
 class MainActivity : AppCompatActivity() {
-    //val pref = PreferenceManager.getDefaultSharedPreferences(this)
-    //val uuid = pref.getString("uuid", "null")
-    //val edit = pref.edit()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //初回起動のための値
-        var preference = getSharedPreferences("Preference Name", MODE_PRIVATE);
-        var editor = preference.edit();
+        var preference = getSharedPreferences("Preference Name", MODE_PRIVATE)
+        var editor = preference.edit()
+
+        val pref = PreferenceManager.getDefaultSharedPreferences(this)
+        val uuid = pref.getString("uuid", "null")
 
         if (preference.getBoolean("Launched", false)==false) {
             //初回起動時の処理
@@ -32,20 +31,13 @@ class MainActivity : AppCompatActivity() {
             editor.putBoolean("Launched", true)
             editor.commit()
             //ID作成
-            //edit.putString("uuid", UUID.randomUUID().toString())
-                //.apply()
-            //Log.d("ID", uuid)
+            createID()
         } else {
             //二回目以降の処理
             Log.d("TAG", "２回以降の起動")
-            //IDが作成されていなかった場合のID作成
-            //if (uuid == "null") {
-            //edit.putString("uuid", UUID.randomUUID().toString())
-            //.apply()
-            //}
-            //Log.d("ID", uuid)
-            //１）Viewの取得
         }
+        Log.d("ID", uuid)
+
         val myrecord: Button = findViewById(R.id.myrecord)
 
         //２）ボタンを押したら次の画面へ
@@ -70,6 +62,17 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+    private fun createID(){ //IDを作成する関数
+        val pref = PreferenceManager.getDefaultSharedPreferences(this)
+        val edit = pref.edit()
+        var id:String? = null
+        var uuid:String? = null
+
+        id = UUID.randomUUID().toString()
+        uuid = (id.substring(0, 7)) + (id.substring(id.length - 10))
+        edit.putString("uuid", uuid)
+            .apply()
     }
 }
 
