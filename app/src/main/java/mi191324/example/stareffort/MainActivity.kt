@@ -18,10 +18,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //初回起動のための値
+        //初回起動のための変数
         var preference = getSharedPreferences("Preference Name", MODE_PRIVATE)
         var editor = preference.edit()
-
+        //ID作成のための変数
         val pref = PreferenceManager.getDefaultSharedPreferences(this)
         val uuid = pref.getString("uuid", "null")
 
@@ -39,30 +39,26 @@ class MainActivity : AppCompatActivity() {
         Log.d("ID", uuid)
 
         val myrecord: Button = findViewById(R.id.myrecord)
+        val friendrecord: Button = findViewById(R.id.friendsrecord)
+        val setting: Button = findViewById(R.id.setting)
 
         //２）ボタンを押したら次の画面へ
         myrecord.setOnClickListener {
             val intent = Intent(this, MyrecordActivity::class.java)
             startActivity(intent)
-
-            val friendrecord: Button = findViewById(R.id.friendsrecord)
-
-            //3）ボタンを押したら次の画面へ
-            friendrecord.setOnClickListener {
-                val intent = Intent(this, FriendrecordActivity::class.java)
-                startActivity(intent)
-
-                val setting: Button = findViewById(R.id.setting)
-
-                //4）ボタンを押したら次の画面へ
-                setting.setOnClickListener {
-                    val intent = Intent(this, SettingActivity::class.java)
-                    startActivity(intent)
-
-                }
-            }
+        }
+        //3）ボタンを押したら次の画面へ
+        friendrecord.setOnClickListener {
+            val intent = Intent(this, FriendrecordActivity::class.java)
+            startActivity(intent)
+        }
+        //4）ボタンを押したら次の画面へ
+        setting.setOnClickListener {
+            val intent = Intent(this, SettingActivity::class.java)
+            startActivity(intent)
         }
     }
+
     private fun createID(){ //IDを作成する関数
         val pref = PreferenceManager.getDefaultSharedPreferences(this)
         val edit = pref.edit()
