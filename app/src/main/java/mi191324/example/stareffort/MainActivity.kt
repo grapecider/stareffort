@@ -42,17 +42,17 @@ class MainActivity : AppCompatActivity() {
         val friendrecord: Button = findViewById(R.id.friendsrecord)
         val setting: Button = findViewById(R.id.setting)
 
-        //２）ボタンを押したら次の画面へ
+        //myrecordボタンを押したらMyrecordActivityへ
         myrecord.setOnClickListener {
             val intent = Intent(this, MyrecordActivity::class.java)
             startActivity(intent)
         }
-        //3）ボタンを押したら次の画面へ
+        //friendrecordボタンを押したらFriendrecordActivityへ
         friendrecord.setOnClickListener {
             val intent = Intent(this, FriendrecordActivity::class.java)
             startActivity(intent)
         }
-        //4）ボタンを押したら次の画面へ
+        //4）settingボタンを押したらSettingActivityへ
         setting.setOnClickListener {
             val intent = Intent(this, SettingActivity::class.java)
             startActivity(intent)
