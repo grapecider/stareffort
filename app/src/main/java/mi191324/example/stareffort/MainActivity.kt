@@ -1,5 +1,6 @@
 package mi191324.example.stareffort
 
+import android.Manifest
 import android.os.Bundle
 import androidx.preference.PreferenceManager
 import android.util.Log
@@ -10,7 +11,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import java.util.UUID
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.widget.Button
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 

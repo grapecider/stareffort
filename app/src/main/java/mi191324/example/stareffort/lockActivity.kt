@@ -3,17 +3,15 @@ package mi191324.example.stareffort
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.json.JSONArray
-import kotlin.math.log
+import org.json.JSONException
+
 
 class lockActivity : AppCompatActivity(){
 
@@ -29,20 +27,26 @@ class lockActivity : AppCompatActivity(){
         allappget()
     }
 
-    fun displayName(appInfo: ApplicationInfo) : CharSequence = this.packageManager.getApplicationLabel(appInfo)
-    fun getLaunchIntent(appInfo: ApplicationInfo) : Intent? = this.packageManager.getLaunchIntentForPackage(appInfo.packageName)
-    fun loadAppIcon(appInfo: ApplicationInfo) : Drawable = this.packageManager.getApplicationIcon(appInfo)
+    fun displayName(appInfo: ApplicationInfo) : CharSequence = this.packageManager.getApplicationLabel(
+        appInfo
+    )
+    fun getLaunchIntent(appInfo: ApplicationInfo) : Intent? = this.packageManager.getLaunchIntentForPackage(
+        appInfo.packageName
+    )
+    fun loadAppIcon(appInfo: ApplicationInfo) : Drawable = this.packageManager.getApplicationIcon(
+        appInfo
+    )
 
     //アプリ取得の際に使うデータリスト
     data class AppInfo(
         val icon: Drawable,
         val name: CharSequence,
         val judgment: Boolean
-        )
+    )
 
     //アプリ一覧取得関数
     fun allappget(){
-        val shardPreferences = getSharedPreferences("KEY",Context.MODE_PRIVATE)
+        val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
         val shardPrefEditor = shardPreferences.edit()
         val edit = shardPreferences.edit()
         val prefapp = shardPreferences.getString("applist", "[]")
@@ -61,7 +65,7 @@ class lockActivity : AppCompatActivity(){
 
         for (appInfo in apps) {
             val packageName = appInfo.packageName
-                //プリインストールされたアプリか判別する。
+            //プリインストールされたアプリか判別する。
             if (appInfo.flags and ApplicationInfo.FLAG_SYSTEM != ApplicationInfo.FLAG_SYSTEM) {
                 val appname = displayName(apps[i])
                 val conect = getLaunchIntent(apps[i])
@@ -82,14 +86,14 @@ class lockActivity : AppCompatActivity(){
         Log.d("final", jsonArray.toString())
 
         //確認消して良し
-        val test:ArrayList<AppInfo> = loadArrayList("applist")
-        Log.d("final", test.toString())
+        /*val test:ArrayList<AppInfo> = loadArrayList("applist")
+        Log.d("final", test.toString())*/
 
     }
 
     private fun loadArrayList(data: String): ArrayList<AppInfo> {
         val pref = PreferenceManager.getDefaultSharedPreferences(this)
-        val shardPreferences = this.getSharedPreferences("KEY",Context.MODE_PRIVATE)
+        val shardPreferences = this.getSharedPreferences("KEY", Context.MODE_PRIVATE)
         val jsonArray = JSONArray(shardPreferences.getString(data, "[]"))
         Log.d("arrayfunction", jsonArray.toString())
         val arrayList : ArrayList<AppInfo> = ArrayList()

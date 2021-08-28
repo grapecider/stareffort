@@ -44,7 +44,7 @@ class profileActivity : AppCompatActivity(){
                     .apply()
 
                 Log.d("newname", newname)
-
+                finish()
                 val intent = Intent(this, profileActivity::class.java)
                 startActivity(intent)
             })
