@@ -13,16 +13,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class applistAdapter(context: Context, var applist: List<lockActivity.AppInfo>) : ArrayAdapter<lockActivity.AppInfo>(context, 0, applist) {
-
     private val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    fun View?.getView(position: Int, parent: ViewGroup?): View {
+    override fun getView(position: Int, convertview: View?, parent: ViewGroup): View {
         // Animalの取得
         val animal = applist[position]
 
         // レイアウトの設定
-        var view = this
-        if (this == null) {
+        var view = convertview
+
+        if (convertview == null) {
             view = layoutInflater.inflate(R.layout.lockapplist, parent, false)
         }
 
@@ -34,7 +34,12 @@ class applistAdapter(context: Context, var applist: List<lockActivity.AppInfo>) 
         name?.text = animal.name
 
         val age = view?.findViewById<TextView>(R.id.judgmenttxt)
-        age?.text = "judgment"
+        if (animal.judgment == true){
+            age?.text = "ロック中"
+        }
+        else {
+            age?.text = "解除中"
+        }
 
         return view!!
     }

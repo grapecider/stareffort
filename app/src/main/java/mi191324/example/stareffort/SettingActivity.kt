@@ -34,39 +34,6 @@ class SettingActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        /*val listView = findViewById<ListView>(R.id.listView)
-        val settinglist: MutableList<MutableMap<String,String>> = mutableListOf()
-
-        var itemlist = mutableMapOf("name" to "プロフィール")
-        settinglist.add(itemlist)
-        itemlist = mutableMapOf("name" to "通知")
-        settinglist.add(itemlist)
-        itemlist = mutableMapOf("name" to "友達追加")
-        settinglist.add(itemlist)
-        itemlist = mutableMapOf("name" to "他アプリロック")
-        settinglist.add(itemlist)
-
-        val from = arrayOf("name")
-        val to = intArrayOf(android.R.id.text1)
-        val adapter = SimpleAdapter(this@SettingActivity, settinglist, android.R.layout.simple_list_item_1, from, to)
-        listView.adapter = adapter
-
-        listView.onItemClickListener = ListItemClick()*/
-
-
-        // Adapterに渡す配列を作成
-        //val data = arrayOf("プロフィール", "通知", "友達追加", "他アプリロック")
-        // adapterを作成
-        //val adapter = ArrayAdapter(
-        //    this,
-        //    android.R.layout.simple_list_item_1,
-        //    data
-        //)
-        // adapterをlistViewに紐付け
-        //listView.adapter = adapter
-
-        //listView.setOnItemClickListener(this)
-
         //buckボタンの取得
         val btnBack: Button = findViewById(R.id.btnBack)
         //戻るボタン（アクティビティの終了）
@@ -74,20 +41,5 @@ class SettingActivity : AppCompatActivity() {
             finish()
         }
     }
-
-    /*private inner class ListItemClick: AdapterView.OnItemLongClickListener {
-        override fun onItemLongClick(
-            parent: AdapterView<*>,
-            view: View?,
-            position: Int,
-            id: Long
-        ){
-            val item = parent.getItemAtPosition(position) as
-                    MutableMap<String,String>
-            val itemname = item["name"]
-
-            val intent2 = Intent(this, )
-        }
-    }*/
 
 }
