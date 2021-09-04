@@ -6,14 +6,9 @@ import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.AdapterView
-import android.widget.AdapterView.OnItemClickListener
 import android.widget.Button
 import android.widget.ListView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -75,7 +70,6 @@ class lockActivity : AppCompatActivity(){
     fun allappget(){
         val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
         val edit = shardPreferences.edit()
-        val prefapp = shardPreferences.getString("applist", "[]")
         val listView:ListView = findViewById(R.id.list_view)
         var appInfolist: ArrayList<AppInfo> = arrayListOf()
         var applistAdapter : applistAdapter = applistAdapter(this, appInfolist)
