@@ -1,10 +1,13 @@
 package mi191324.example.stareffort
 
+
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
@@ -92,7 +95,28 @@ class Serviceclass : Service() {
                 }
             }
         }
-        //Log.d("runningapp", appList.toString())
+        val am = this.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        val taskInfo = am.getRunningTasks(1)
+        Log.d("dib", taskInfo.toString())
+        Log.d("topActivity", "CURRENT Activity ::" + taskInfo[0].topActivity!!.className)
+        val componentInfo = taskInfo[0].topActivity
+        componentInfo!!.packageName
+
+        val mActiviyManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+
+        // 現在稼働中のプロセスをLISTで取得
+
+        // 現在稼働中のプロセスをLISTで取得
+        /*val processList = mActiviyManager.runningAppProcesses
+        for (process in processList) {
+            Log.i(TAG, "pid:" + process.pid)
+            Log.i(TAG, "processName:" + process.processName)
+        }*/
+        val endCal = Calendar.getInstance()
+        val beginCal = Calendar.getInstance()
+        val mActivityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        val appProcessInfoList: List<*> = mActivityManager.getRunningServices(Int.MAX_VALUE)
+        Log.d("sip", appProcessInfoList.toString())
     }
 
     /**現在画面に表示されているアプリの情報を返す。 */
@@ -121,5 +145,50 @@ class Serviceclass : Service() {
             if (serviceInfo.process.equals(processName)) return true
         }
         return false
+    }
+}
+
+enum class AppProcessStatus {
+    /** 最前面で起動中 */
+    FOREGROUND,
+    /** バックグラウンド状態 */
+    BACKGROUND,
+    /** プロセスが存在しない */
+    GONE;
+
+    companion object {
+        /** 現在のアプリのプロセスの状態を取得する */
+        fun current(context: Context): AppProcessStatus {
+            if (!existsAppTask(context)) return GONE
+            if (isForeground(context)) return FOREGROUND
+            return BACKGROUND
+        }
+
+        private fun isForeground(context: Context): Boolean {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val runningProcesses = am.runningAppProcesses
+            for (processInfo in runningProcesses) {
+                for (activeProcess in processInfo.pkgList) {
+                    if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                        return true
+                    }
+                }
+            }
+            return false
+        }
+
+        private fun existsAppTask(context: Context): Boolean {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                return am.appTasks.count() > 0
+            }
+            val recentTasks = am.getRunningTasks(Integer.MAX_VALUE)
+            for (i in recentTasks.indices) {
+                if (recentTasks[i].baseActivity!!.packageName == context.packageName) {
+                    return true
+                }
+            }
+            return false
+        }
     }
 }

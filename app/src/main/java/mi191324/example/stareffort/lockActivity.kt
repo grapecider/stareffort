@@ -114,15 +114,13 @@ class lockActivity : AppCompatActivity(){
 
         edit.putString("applist", gson.toJson(saveapp))
             .apply()
-
-        val name = NameList.get(0)
     }
     //保存したArrayListを呼び出す関数
     fun getprefapps(): ArrayList<*> {
         val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
         val gson = Gson()
         val NameList: ArrayList<*> = gson.fromJson(
-            shardPreferences.getString("applist", null),
+            shardPreferences.getString("applist", "[]"),
             object : TypeToken<List<*>>() {}.type
         )
         return NameList

@@ -1,20 +1,36 @@
 package mi191324.example.stareffort
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.jaredrummler.android.processes.AndroidProcesses
 import java.util.*
+import java.util.jar.Manifest
 
 
 class MainActivity : AppCompatActivity() {
 
+    private val PERMISSION_REQUEST_CODE = 1000
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //permissionの許可取り
+        permissionCheck(android.Manifest.permission.PACKAGE_USAGE_STATS, "package", PERMISSION_REQUEST_CODE)
 
         //初回起動のための変数
         var preference = getSharedPreferences("Preference Name", MODE_PRIVATE)
@@ -96,6 +112,46 @@ class MainActivity : AppCompatActivity() {
             val appName = packageInfo.applicationInfo.loadLabel(packageManager).toString()
             Log.d("appname", appName)
         }
+    }
+
+    fun permissionCheck(permission: String, name:String, request:Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            when {
+                ContextCompat.checkSelfPermission(applicationContext, permission) == PackageManager.PERMISSION_GRANTED -> {
+                    Toast.makeText(applicationContext, "$name permission granted", Toast.LENGTH_SHORT).show()
+                }
+                shouldShowRequestPermissionRationale(permission) -> showDialog(permission, name, request)
+
+                else -> ActivityCompat.requestPermissions(this, arrayOf(permission), request)
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        fun innerCheck(name: String) {
+            if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(applicationContext, "$name permission refused", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(applicationContext, "$name permission granted", Toast.LENGTH_SHORT).show()
+            }
+        }
+        when (requestCode){
+            PERMISSION_REQUEST_CODE -> innerCheck("package")
+        }
+    }
+
+    fun showDialog(permission: String, name: String, request: Int){
+        val builder = AlertDialog.Builder(this)
+
+        builder.apply {
+            setMessage("Permission to access your $name is required to use this app")
+            setTitle("Permission required")
+            setPositiveButton("OK") {dialog, which ->
+                ActivityCompat.requestPermissions(this@MainActivity, arrayOf(permission), request)
+            }
+        }
+        val dialog = builder.create()
+        dialog.show()
     }
 }
 
