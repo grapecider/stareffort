@@ -1,13 +1,10 @@
 package mi191324.example.stareffort
 
-
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
@@ -27,15 +24,14 @@ class Serviceclass : Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.i("TestService", "onStartCommand")
-        var appname:String
+        var appname: String
         mTimer = Timer(true)
         mTimer!!.schedule(object : TimerTask() {
             override fun run() {
-                appname = proceedapp()
+                proceedapp()
                 appgetter()
                 mHandler.post {
                     Log.d("TestService", "Timer run")
-                    Log.d("nowappname", appname)
                 }
             }
         }, 10000, 1000)
@@ -51,12 +47,11 @@ class Serviceclass : Service() {
         return null
     }
 
-    fun proceedapp(): String {
+    fun proceedapp() {
         //動いているアプリ一覧取得
         val processes = AndroidProcesses.getRunningAppProcesses()
-        var appName:String = "null"
-        val applist:ArrayList<String> = ArrayList()
-
+        val applist: ArrayList<String> = ArrayList()
+        Log.d("size", processes.size.toString())
         for (process in processes) {
             // Get some information about the process
             val processName = process.name
@@ -70,14 +65,14 @@ class Serviceclass : Service() {
             val totalSizeOfProcess = statm.size
             val residentSetSize = statm.residentSetSize
             val packageInfo = process.getPackageInfo(this, 0)
-            appName = packageInfo.applicationInfo.loadLabel(packageManager).toString()
+            val appName = packageInfo.applicationInfo.loadLabel(packageManager).toString()
+            Log.d("appnamefor", appName)
             applist.add(appName)
         }
         Log.d("applist", applist.toString())
-        return appName
     }
 
-    fun appgetter(){
+    fun appgetter() {
         val appList = ArrayList<String>()
         val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         //起動中アプリの取得
@@ -104,91 +99,36 @@ class Serviceclass : Service() {
 
         val mActiviyManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
 
-        // 現在稼働中のプロセスをLISTで取得
 
         // 現在稼働中のプロセスをLISTで取得
-        /*val processList = mActiviyManager.runningAppProcesses
-        for (process in processList) {
-            Log.i(TAG, "pid:" + process.pid)
-            Log.i(TAG, "processName:" + process.processName)
+        val processList: MutableList<RunningAppProcessInfo>? = mActiviyManager.runningAppProcesses
+        for (process in processList!!) {
+            Log.d("TAG1", "pid:" + process.pid)
+            Log.d("TAG2", "processName:" + process.processName)
+        }
+        /*val pm: PackageManager = getPackageManager()
+        val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        for (packageInfo in packages) {
+            Log.d(TAG, "Installed package :" + packageInfo.packageName)
+            Log.d(TAG, "Source dir : " + packageInfo.sourceDir)
+            Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName))
         }*/
-        val endCal = Calendar.getInstance()
-        val beginCal = Calendar.getInstance()
-        val mActivityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val appProcessInfoList: List<*> = mActivityManager.getRunningServices(Int.MAX_VALUE)
-        Log.d("sip", appProcessInfoList.toString())
-    }
-
-    /**現在画面に表示されているアプリの情報を返す。 */
-    val foregroundAppInfo: RunningAppProcessInfo?
-        get() {
-            val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-            val appInfoList = activityManager.runningAppProcesses
-            for (appInfo in appInfoList) {
-                if (appInfo.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-                    && !isRunningService(appInfo.processName)
-                ) {
-                    Log.d("jack", appInfo.toString())
-                    return appInfo
-                }
+        /*val amm = this.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        val l: List<*> = am.getRecentTasks(1, ActivityManager.RECENT_WITH_EXCLUDED)
+        val i = l.iterator()
+        val pm = packageManager
+        while (i.hasNext()) {
+            val info = i.next() as RunningAppProcessInfo
+            try {
+                val c = pm.getApplicationLabel(
+                    pm.getApplicationInfo(
+                        info.processName, PackageManager.GET_META_DATA
+                    )
+                )
+                Log.w("LABEL", c.toString())
+            } catch (e: Exception) {
             }
-            return null
-        }
-
-    /**もしプロセスがサービスならtrueを返す。 */
-    private fun isRunningService(processName: String?): Boolean {
-        if (processName == null) return false
-        val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val serviceInfoList: List<ActivityManager.RunningServiceInfo> =
-            activityManager.getRunningServices(Int.MAX_VALUE)
-        for (serviceInfo in serviceInfoList) {
-            if (serviceInfo.process.equals(processName)) return true
-        }
-        return false
+        }*/
     }
 }
 
-enum class AppProcessStatus {
-    /** 最前面で起動中 */
-    FOREGROUND,
-    /** バックグラウンド状態 */
-    BACKGROUND,
-    /** プロセスが存在しない */
-    GONE;
-
-    companion object {
-        /** 現在のアプリのプロセスの状態を取得する */
-        fun current(context: Context): AppProcessStatus {
-            if (!existsAppTask(context)) return GONE
-            if (isForeground(context)) return FOREGROUND
-            return BACKGROUND
-        }
-
-        private fun isForeground(context: Context): Boolean {
-            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            val runningProcesses = am.runningAppProcesses
-            for (processInfo in runningProcesses) {
-                for (activeProcess in processInfo.pkgList) {
-                    if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                        return true
-                    }
-                }
-            }
-            return false
-        }
-
-        private fun existsAppTask(context: Context): Boolean {
-            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                return am.appTasks.count() > 0
-            }
-            val recentTasks = am.getRunningTasks(Integer.MAX_VALUE)
-            for (i in recentTasks.indices) {
-                if (recentTasks[i].baseActivity!!.packageName == context.packageName) {
-                    return true
-                }
-            }
-            return false
-        }
-    }
-}
