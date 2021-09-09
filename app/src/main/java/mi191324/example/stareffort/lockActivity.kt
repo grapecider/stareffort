@@ -85,9 +85,7 @@ class lockActivity : AppCompatActivity(){
             //プリインストールされたアプリか判別する。
             if (appInfo.flags and ApplicationInfo.FLAG_SYSTEM != ApplicationInfo.FLAG_SYSTEM) {
                 val appname = displayName(allapps[i])
-                Log.d("appname", appname.toString())
                 val conect = getLaunchIntent(allapps[i])
-                Log.d("conect", conect.toString())
                 val icon = loadAppIcon(allapps[i])
                 val packageName = appInfo.packageName
                 Log.d("jj", packageName.toString())

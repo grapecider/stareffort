@@ -1,20 +1,22 @@
 package mi191324.example.stareffort
 
 import android.app.ActivityManager
-import android.app.ActivityManager.RunningAppProcessInfo
 import android.app.Service
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.content.pm.ApplicationInfo
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
-import androidx.core.content.ContextCompat.getSystemService
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.log
 
 
 class Serviceclass : Service() {
@@ -32,11 +34,16 @@ class Serviceclass : Service() {
         mTimer = Timer(true)
         mTimer!!.schedule(object : TimerTask() {
             override fun run() {
-                appgetter()
-                val applist = printForegroundTask()
+                val forapp = printForegroundTask()
+                val prefapplist = getprefapps()
+                val pkgs = allappget()
                 mHandler.post {
                     Log.d("TestService", "Timer run")
-                    Log.d("apps", applist.toString())
+                    for (app in pkgs){
+                        if (app == forapp.toString()){
+                            Log.d("下ネタ", "tinko")
+                        }
+                    }
                 }
             }
         }, 10000, 1000)
@@ -52,42 +59,9 @@ class Serviceclass : Service() {
         return null
     }
 
-    fun appgetter() {
-        val appList = ArrayList<String>()
-        val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        //起動中アプリの取得
-        val runningApp = activityManager.runningAppProcesses
-        Log.d("pop", runningApp.toString())
-        val packageManager = packageManager
-        if (runningApp != null) {
-            for (app in runningApp) {
-                try {
-                    // アプリ名をリストに追加
-                    val appInfo = packageManager.getApplicationInfo(app.processName, 0)
-                    appList.add(appInfo.toString())
-                } catch (e: PackageManager.NameNotFoundException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-        val am = this.getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val taskInfo = am.getRunningTasks(1)
-        Log.d("dib", taskInfo.toString())
-        Log.d("topActivity", "CURRENT Activity ::" + taskInfo[0].topActivity!!.className)
-        val componentInfo = taskInfo[0].topActivity
-        componentInfo!!.packageName
-
-        val mActiviyManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-
-
-        // 現在稼働中のプロセスをLISTで取得
-        val processList: MutableList<RunningAppProcessInfo>? = mActiviyManager.runningAppProcesses
-        for (process in processList!!) {
-            Log.d("TAG1", "pid:" + process.pid)
-            Log.d("TAG2", "processName:" + process.processName)
-        }
-    }
+    //フォアグランドアプリ取得
     private fun printForegroundTask(): String? {
+        val applist = allappget()
         var currentApp = "NULL"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val usm = this.getSystemService("usagestats"!!) as UsageStatsManager
@@ -111,5 +85,47 @@ class Serviceclass : Service() {
         Log.e("adapter", "Current App in foreground is: $currentApp")
         return currentApp
     }
+
+    //pref保存したArrayListを呼び出す関数
+    fun getprefapps(): ArrayList<*> {
+        val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
+        val gson = Gson()
+        val NameList: ArrayList<*> = gson.fromJson(
+            shardPreferences.getString("applist", "[]"),
+            object : TypeToken<List<*>>() {}.type
+        )
+        var applist = arrayListOf<String>()
+        var i:Int = 1
+        while (i < NameList.size){
+            if (NameList.get(i).toString() == "false"){
+                i -= 1
+                applist.add(NameList.get(i).toString())
+                i += 1
+            }
+            i += 2
+        }
+        return applist
+    }
+    //インストール済みアプリ取得
+    fun allappget() : ArrayList<String>{
+        val arraylist = arrayListOf<String>()
+        val prefapplist = getprefapps()
+        val allapps = this.packageManager.getInstalledApplications(0)
+        for (appInfo in allapps) {
+            if (appInfo.flags and ApplicationInfo.FLAG_SYSTEM != ApplicationInfo.FLAG_SYSTEM) {
+                val appname = displayName(appInfo)
+                for (prefapp in prefapplist){
+                    if (appname == prefapp){
+                        arraylist.add(appInfo.packageName.toString())
+                    }
+                }
+            }
+        }
+        return arraylist
+    }
+    //アプリネーム取得関数
+    fun displayName(appInfo: ApplicationInfo) : CharSequence = this.packageManager.getApplicationLabel(
+        appInfo
+    )
 }
 
