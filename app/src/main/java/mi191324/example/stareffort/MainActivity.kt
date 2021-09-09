@@ -76,18 +76,17 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, SettingActivity::class.java)
             startActivity(intent)
         }
-        //実験
-        proceedapp()
-        //service
+        //バックグラウンド処理開始
         startService(Intent(this@MainActivity, Serviceclass::class.java))
 
     }
 
-    private fun createID(){ //IDを作成する関数
+    //IDを作成する関数
+    private fun createID(){
         val pref = PreferenceManager.getDefaultSharedPreferences(this)
         val edit = pref.edit()
-        var id:String? = null
-        var uuid:String? = null
+        var id:String?
+        var uuid:String?
 
         id = UUID.randomUUID().toString()
         uuid = (id.substring(0, 7)) + (id.substring(id.length - 10))
@@ -95,33 +94,12 @@ class MainActivity : AppCompatActivity() {
             .apply()
     }
 
-    fun proceedapp(){
-        //動いているアプリ一覧取得
-        val processes = AndroidProcesses.getRunningAppProcesses()
-
-        for (process in processes) {
-            // Get some information about the process
-            val processName = process.name
-            val stat = process.stat()
-            val pid = stat.pid
-            val parentProcessId = stat.ppid()
-            val startTime = stat.stime()
-            val policy = stat.policy()
-            val state = stat.state()
-            val statm = process.statm()
-            val totalSizeOfProcess = statm.size
-            val residentSetSize = statm.residentSetSize
-            val packageInfo = process.getPackageInfo(this, 0)
-            val appName = packageInfo.applicationInfo.loadLabel(packageManager).toString()
-            Log.d("appname", appName)
-        }
-    }
     //permission許可関数
     private fun isaccessGranted(): Boolean {
         return try {
             val packageManager = packageManager
             val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
-            val appOpsManager = if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            val appOpsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
             } else {
                 TODO("VERSION.SDK_INT < KITKAT")

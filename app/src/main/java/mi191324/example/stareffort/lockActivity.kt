@@ -82,13 +82,16 @@ class lockActivity : AppCompatActivity(){
         var i = 0
         var I = 0
         for (appInfo in allapps) {
-            val packageName = appInfo.packageName
             //プリインストールされたアプリか判別する。
             if (appInfo.flags and ApplicationInfo.FLAG_SYSTEM != ApplicationInfo.FLAG_SYSTEM) {
                 val appname = displayName(allapps[i])
+                Log.d("appname", appname.toString())
                 val conect = getLaunchIntent(allapps[i])
+                Log.d("conect", conect.toString())
                 val icon = loadAppIcon(allapps[i])
-                var judgment:Boolean = true
+                val packageName = appInfo.packageName
+                Log.d("jj", packageName.toString())
+                var judgment = true
                 while (I < NameList.size) {
                     if (appname.toString() == NameList.get(I)) {
                         I++

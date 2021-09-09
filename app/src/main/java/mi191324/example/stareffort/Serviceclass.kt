@@ -3,12 +3,16 @@ package mi191324.example.stareffort
 import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo
 import android.app.Service
+import android.app.usage.UsageStats
+import android.app.usage.UsageStatsManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
-import com.jaredrummler.android.processes.AndroidProcesses
+import androidx.core.content.ContextCompat.getSystemService
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -28,10 +32,11 @@ class Serviceclass : Service() {
         mTimer = Timer(true)
         mTimer!!.schedule(object : TimerTask() {
             override fun run() {
-                proceedapp()
                 appgetter()
+                val applist = printForegroundTask()
                 mHandler.post {
                     Log.d("TestService", "Timer run")
+                    Log.d("apps", applist.toString())
                 }
             }
         }, 10000, 1000)
@@ -45,31 +50,6 @@ class Serviceclass : Service() {
     override fun onBind(arg0: Intent): IBinder? {
         Log.i("TestService", "onBind")
         return null
-    }
-
-    fun proceedapp() {
-        //動いているアプリ一覧取得
-        val processes = AndroidProcesses.getRunningAppProcesses()
-        val applist: ArrayList<String> = ArrayList()
-        Log.d("size", processes.size.toString())
-        for (process in processes) {
-            // Get some information about the process
-            val processName = process.name
-            val stat = process.stat()
-            val pid = stat.pid
-            val parentProcessId = stat.ppid()
-            val startTime = stat.stime()
-            val policy = stat.policy()
-            val state = stat.state()
-            val statm = process.statm()
-            val totalSizeOfProcess = statm.size
-            val residentSetSize = statm.residentSetSize
-            val packageInfo = process.getPackageInfo(this, 0)
-            val appName = packageInfo.applicationInfo.loadLabel(packageManager).toString()
-            Log.d("appnamefor", appName)
-            applist.add(appName)
-        }
-        Log.d("applist", applist.toString())
     }
 
     fun appgetter() {
@@ -106,29 +86,30 @@ class Serviceclass : Service() {
             Log.d("TAG1", "pid:" + process.pid)
             Log.d("TAG2", "processName:" + process.processName)
         }
-        /*val pm: PackageManager = getPackageManager()
-        val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-        for (packageInfo in packages) {
-            Log.d(TAG, "Installed package :" + packageInfo.packageName)
-            Log.d(TAG, "Source dir : " + packageInfo.sourceDir)
-            Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName))
-        }*/
-        /*val amm = this.getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        val l: List<*> = am.getRecentTasks(1, ActivityManager.RECENT_WITH_EXCLUDED)
-        val i = l.iterator()
-        val pm = packageManager
-        while (i.hasNext()) {
-            val info = i.next() as RunningAppProcessInfo
-            try {
-                val c = pm.getApplicationLabel(
-                    pm.getApplicationInfo(
-                        info.processName, PackageManager.GET_META_DATA
-                    )
-                )
-                Log.w("LABEL", c.toString())
-            } catch (e: Exception) {
+    }
+    private fun printForegroundTask(): String? {
+        var currentApp = "NULL"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val usm = this.getSystemService("usagestats"!!) as UsageStatsManager
+            val time = System.currentTimeMillis()
+            val appList =
+                usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 1000, time)
+            if (appList != null && appList.size > 0) {
+                val mySortedMap: SortedMap<Long, UsageStats> = TreeMap()
+                for (usageStats in appList) {
+                    mySortedMap[usageStats.lastTimeUsed] = usageStats
+                }
+                if (mySortedMap != null && !mySortedMap.isEmpty()) {
+                    currentApp = mySortedMap[mySortedMap.lastKey()]!!.packageName
+                }
             }
-        }*/
+        } else {
+            val am = this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val tasks = am.runningAppProcesses
+            currentApp = tasks[0].processName
+        }
+        Log.e("adapter", "Current App in foreground is: $currentApp")
+        return currentApp
     }
 }
 
