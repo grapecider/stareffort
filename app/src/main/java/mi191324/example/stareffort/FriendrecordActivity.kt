@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.activity_friendrecord.*
 
 class FriendrecordActivity : AppCompatActivity() {
     lateinit var barList: ArrayList<BarEntry>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friendrecord)
