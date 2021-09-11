@@ -169,7 +169,7 @@ class Serviceclass : Service() {
         var applist = arrayListOf<String>()
         var i:Int = 1
         while (i < NameList.size){
-            if (NameList.get(i).toString() == "true"){
+            if (NameList.get(i).toString() == "false"){
                 i -= 1
                 applist.add(NameList.get(i).toString())
                 i += 1

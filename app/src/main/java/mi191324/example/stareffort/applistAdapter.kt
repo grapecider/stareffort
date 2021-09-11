@@ -35,10 +35,10 @@ class applistAdapter(context: Context, var applist: List<lockActivity.AppInfo>) 
 
         val age = view?.findViewById<TextView>(R.id.judgmenttxt)
         if (animal.judgment == false){
-            age?.text = "解除中"
+            age?.text = "ロック中"
         }
         else {
-            age?.text = "ロック中"
+            age?.text = "解除中"
         }
 
         return view!!
