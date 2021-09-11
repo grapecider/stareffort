@@ -29,9 +29,9 @@ class MainActivity : AppCompatActivity() {
             Log.d("permission", "OK")
         }else{
             Log.d("permission", "NO")
-            var intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            var intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
             startActivity(intent)
-            intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+            intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
             startActivity(intent)
         }
 
