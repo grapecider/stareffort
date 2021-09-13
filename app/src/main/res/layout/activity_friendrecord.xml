@@ -7,6 +7,14 @@
     android:layout_height="match_parent"
     tools:context=".FriendrecordActivity">
 
+<<<<<<< HEAD
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/barChart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+=======
+>>>>>>> 74e5813294ef61badaf71365f705ba062655bf74
     <Button
         android:id="@+id/btnBack"
         android:layout_width="wrap_content"
