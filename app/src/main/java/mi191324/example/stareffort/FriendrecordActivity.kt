@@ -1,5 +1,6 @@
 package mi191324.example.stareffort
 
+<<<<<<< HEAD
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -20,11 +21,19 @@ class FriendrecordActivity : AppCompatActivity() {
     lateinit var barDataSet: BarDataSet
     lateinit var barData: BarData
 
+=======
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Button
+
+class FriendrecordActivity : AppCompatActivity() {
+>>>>>>> 74e5813294ef61badaf71365f705ba062655bf74
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friendrecord)
         val btnBack :Button = findViewById(R.id.btnBack)
 
+<<<<<<< HEAD
         //戻るボタン（アクティビティの終了）
         btnBack.setOnClickListener {
             finish()
@@ -43,5 +52,11 @@ class FriendrecordActivity : AppCompatActivity() {
         barDataSet.setColors(ColorTemplate.JOYFUL_COLORS, 250)
         barDataSet.valueTextColor = Color.BLACK
         barDataSet.valueTextSize = 15f
+=======
+        //３）戻るボタン（アクティビティの終了）
+        btnBack.setOnClickListener {
+            finish()
+        }
+>>>>>>> 74e5813294ef61badaf71365f705ba062655bf74
     }
 }
