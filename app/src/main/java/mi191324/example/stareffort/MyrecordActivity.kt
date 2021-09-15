@@ -36,21 +36,6 @@ class MyrecordActivity : AppCompatActivity() {
         barDataSet.setColors(ColorTemplate.JOYFUL_COLORS, 250)
         barDataSet.valueTextColor = Color.BLACK
         barDataSet.valueTextSize = 15f
-=======
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.widget.Button
 
-class MyrecordActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_myrecord)
-        val btnBack :Button = findViewById(R.id.btnBack)
-
-        //３）戻るボタン（アクティビティの終了）
-        btnBack.setOnClickListener {
-            finish()
-        }
->>>>>>> 74e5813294ef61badaf71365f705ba062655bf74
     }
 }
