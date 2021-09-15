@@ -10,8 +10,7 @@ import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
-import com.jaredrummler.android.processes.AndroidProcesses
+import android.preference.PreferenceManager
 import kotlinx.android.synthetic.main.activity_homeapp.*
 import java.util.*
 

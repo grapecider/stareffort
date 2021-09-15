@@ -10,7 +10,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.preference.PreferenceManager
+import android.preference.PreferenceManager
 import org.w3c.dom.Text
 
 class profileActivity : AppCompatActivity(){

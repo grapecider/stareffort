@@ -1,16 +1,12 @@
 package mi191324.example.stareffort
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
-import android.widget.ListView
 import android.widget.TextView
-
-import androidx.recyclerview.widget.RecyclerView
 
 class applistAdapter(context: Context, var applist: List<lockActivity.AppInfo>) : ArrayAdapter<lockActivity.AppInfo>(context, 0, applist) {
     private val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater

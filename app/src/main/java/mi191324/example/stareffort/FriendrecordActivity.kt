@@ -1,16 +1,9 @@
 package mi191324.example.stareffort
 
-<<<<<<< HEAD
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
-import com.github.mikephil.charting.charts.CombinedChart
-import com.github.mikephil.charting.charts.CombinedChart.DrawOrder
-import com.github.mikephil.charting.components.Legend
-import com.github.mikephil.charting.components.YAxis
-import com.github.mikephil.charting.utils.ColorTemplate
-import com.github.mikephil.charting.data.*
 import kotlinx.android.synthetic.main.activity_friendrecord.*
 import kotlinx.android.synthetic.main.activity_friendrecord.barChart
 import kotlinx.android.synthetic.main.activity_myrecord.*
@@ -21,7 +14,6 @@ class FriendrecordActivity : AppCompatActivity() {
     lateinit var barDataSet: BarDataSet
     lateinit var barData: BarData
 
-=======
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
