@@ -11,7 +11,6 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.github.mikephil.charting.data.*
 import kotlinx.android.synthetic.main.activity_friendrecord.*
-import kotlinx.android.synthetic.main.activity_friendrecord.barChart
 
 class FriendrecordActivity : AppCompatActivity() {
     lateinit var barList: ArrayList<BarEntry>
