@@ -11,6 +11,7 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.github.mikephil.charting.data.*
 import kotlinx.android.synthetic.main.activity_myrecord.*
+import kotlinx.android.synthetic.main.activity_myrecord.barChart
 
 class MyrecordActivity : AppCompatActivity() {
     lateinit var barList: ArrayList<BarEntry>

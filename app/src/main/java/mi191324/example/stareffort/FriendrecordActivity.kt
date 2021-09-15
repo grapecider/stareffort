@@ -12,7 +12,6 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import com.github.mikephil.charting.data.*
 import kotlinx.android.synthetic.main.activity_friendrecord.*
 import kotlinx.android.synthetic.main.activity_friendrecord.barChart
-import kotlinx.android.synthetic.main.activity_myrecord.*
 
 class FriendrecordActivity : AppCompatActivity() {
     lateinit var barList: ArrayList<BarEntry>
@@ -24,6 +23,7 @@ class FriendrecordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friendrecord)
         val btnBack :Button = findViewById(R.id.btnBack)
+
 
         //戻るボタン（アクティビティの終了）
         btnBack.setOnClickListener {
