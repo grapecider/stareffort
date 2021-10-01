@@ -23,6 +23,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //ID送信のための変数
+        val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
+        val edit = shardPreferences.edit()
+        var idpush = shardPreferences.getString("idpush", "0")
+        val username = shardPreferences.getString("username", "Unknown")
+
         //permission許可
         if (isaccessGranted()){
             Log.d("permission", "OK")
@@ -56,7 +62,12 @@ class MainActivity : AppCompatActivity() {
         }
         Log.d("ID", uuid)
 
-        //実験
+        //サーバーにIDと名前を送信
+        if (idpush == "0"){
+
+        }
+
+
 
         val myrecord: Button = findViewById(R.id.myrecord)
         val friendrecord: Button = findViewById(R.id.friendsrecord)
@@ -80,6 +91,9 @@ class MainActivity : AppCompatActivity() {
         //バックグラウンド処理開始
         startService(Intent(this@MainActivity, Serviceclass::class.java))
 
+        //edit.putString("idpush", "0")
+        //    .apply()
+        Log.d("firstpush", idpush + username)
     }
 
     //IDを作成する関数
