@@ -1,6 +1,7 @@
 package mi191324.example.stareffort
 
 import android.app.AppOpsManager
+import android.app.PendingIntent.getActivity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,6 +12,10 @@ import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import android.preference.PreferenceManager
+import android.widget.Toast
+import com.github.kittinunf.fuel.httpPost
+import com.squareup.moshi.KotlinJsonAdapterFactory
+import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.activity_homeapp.*
 import java.util.*
 
@@ -64,10 +69,34 @@ class MainActivity : AppCompatActivity() {
 
         //サーバーにIDと名前を送信
         if (idpush == "0"){
+            val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/userlist"
+            val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+            val requestAdapter = moshi.adapter(userlist::class.java)
+            val header: HashMap<String, String> = hashMapOf("Content-Type" to "application/json")
+            val pushtext = userlist(id = uuid!!, user = username!!)
+            val httpAsync = (httpurl)
+                .httpPost()
+                .header(header).body(requestAdapter.toJson(pushtext))
+                .responseString{request, response, result ->
+                    Log.d("hoge", result.toString())
+                    when(result){
+                        is com.github.kittinunf.result.Result.Failure ->{
+                            val ex = result.getException()
+                            Log.d("response", ex.toString())
+                            val myToast: Toast = Toast.makeText(this, "送信失敗しました", Toast.LENGTH_LONG)
+                            myToast.show()
+                        }
 
+                        is com.github.kittinunf.result.Result.Success -> {
+                            val data = result.get()
+                            Log.d("responce", data)
+                            val myToast: Toast = Toast.makeText(this, "送信しました", Toast.LENGTH_LONG)
+                            myToast.show()
+                            edit.putString("idpush", "1")
+                        }
+                    }
+                }
         }
-
-
 
         val myrecord: Button = findViewById(R.id.myrecord)
         val friendrecord: Button = findViewById(R.id.friendsrecord)
@@ -131,4 +160,9 @@ class MainActivity : AppCompatActivity() {
             false
         }
     }
+
+    data class userlist (
+        val id: String,
+        val user: String
+    )
 }

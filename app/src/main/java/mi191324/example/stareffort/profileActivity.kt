@@ -1,5 +1,6 @@
 package mi191324.example.stareffort
 
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
@@ -26,6 +27,7 @@ class profileActivity : AppCompatActivity(){
         val idtxt:TextView = findViewById(R.id.idtxt)
         val nametxt:TextView = findViewById(R.id.nametxt)
         val changeBtn:Button = findViewById(R.id.changeBtn)
+        val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
         val pref = PreferenceManager.getDefaultSharedPreferences(this)
         val edit = pref.edit()
         val myid = pref.getString("uuid", "Unknown")
