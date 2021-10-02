@@ -14,10 +14,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.preference.PreferenceManager
 import android.widget.Toast
 import com.github.kittinunf.fuel.httpPost
+import com.google.gson.Gson
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.activity_homeapp.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -33,6 +35,9 @@ class MainActivity : AppCompatActivity() {
         val edit = shardPreferences.edit()
         var idpush = shardPreferences.getString("idpush", "0")
         val username = shardPreferences.getString("username", "Unknown")
+
+        val idlist = shardPreferences.getString("idlist", "[]")
+        Log.d("idlist", idlist)
 
         //permission許可
         if (isaccessGranted()){
@@ -90,9 +95,19 @@ class MainActivity : AppCompatActivity() {
                         is com.github.kittinunf.result.Result.Success -> {
                             val data = result.get()
                             Log.d("responce", data)
-                            val myToast: Toast = Toast.makeText(this, "送信しました", Toast.LENGTH_LONG)
-                            myToast.show()
                             edit.putString("idpush", "1")
+                                .apply()
+
+                            val idadd:ArrayList<String> = arrayListOf()
+                            val gson = Gson()
+                            idadd.add(uuid)
+                            Log.d("idadd", idadd.toString())
+                            edit.putString("idlist", gson.toJson(idadd))
+                                .apply()
+                            val idlist = shardPreferences.getString("idlist", "[]")
+                            val  idpush = shardPreferences.getString("idpush", "0")
+                            Log.d("idlist", idlist)
+                            Log.d("idpush", idpush)
                         }
                     }
                 }
