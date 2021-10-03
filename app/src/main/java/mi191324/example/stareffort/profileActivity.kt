@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.preference.PreferenceManager
 import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
@@ -38,19 +39,22 @@ class profileActivity : AppCompatActivity(){
         val myid = pref.getString("uuid", "Unknown")
         val username = pref.getString("username", "Unknown")
         val idset = "ID:" + myid
+        var last:Int = 0
 
         changeBtn.setOnClickListener{
             val myedit = EditText(this)
             val dialog = AlertDialog.Builder(this)
             dialog.setTitle("新しい文字を入力してください")
             dialog.setView(myedit)
-            dialog.setPositiveButton("OK", DialogInterface.OnClickListener {_, _ ->
-                val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/name_change"
+            dialog.setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                val httpurl =
+                    "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/name_change"
                 val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
                 val requestAdapter = moshi.adapter(userlist::class.java)
-                val header: HashMap<String, String> = hashMapOf("Content-Type" to "application/json")
-                var newname:String = myedit.getText().toString()
-                if (newname.length == 0){
+                val header: HashMap<String, String> =
+                    hashMapOf("Content-Type" to "application/json")
+                var newname: String = myedit.getText().toString()
+                if (newname.length == 0) {
                     newname = username!!
                 }
                 val pushtext = userlist(id = myid!!, name = newname)
@@ -59,33 +63,32 @@ class profileActivity : AppCompatActivity(){
                     .header(header).body(requestAdapter.toJson(pushtext))
                     .responseString { request, response, result ->
                         Log.d("hoge", result.toString())
-                        when(result){
-                            is com.github.kittinunf.result.Result.Failure ->{
+                        when (result) {
+                            is Result.Failure -> {
                                 val ex = result.getException()
                                 Log.d("response", ex.toString())
-                                val myToast: Toast = Toast.makeText(this, "送信失敗しました", Toast.LENGTH_LONG)
+                                val myToast: Toast = Toast.makeText(this, "名前変更失敗しました", Toast.LENGTH_LONG)
                                 myToast.show()
                             }
 
-                            is com.github.kittinunf.result.Result.Success -> {
+                            is Result.Success -> {
                                 val data = result.get()
                                 Log.d("responce", data)
-                                Toast.makeText(this, "名前を変更しました", Toast.LENGTH_SHORT).show()
+                                edit.putString("username", newname)
+                                    .apply()
+                                val myToast: Toast = Toast.makeText(this, "名前変更しました", Toast.LENGTH_LONG)
+                                myToast.show()
                             }
                         }
                     }
-
-                edit.putString("username", newname)
-                    .apply()
-                Log.d("newname", newname)
-                finish()
-                val intent = Intent(this, profileActivity::class.java)
-                startActivity(intent)
             })
             dialog.setNegativeButton("キャンセル", null)
             dialog.show()
 
         }
+        //finish()
+        //val intent = Intent(this, profileActivity::class.java)
+        //startActivity(intent)
 
         idtxt.setText(idset)
         nametxt.setText(username)
