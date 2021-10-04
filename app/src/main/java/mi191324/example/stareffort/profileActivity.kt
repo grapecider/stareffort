@@ -67,8 +67,7 @@ class profileActivity : AppCompatActivity(){
                             is Result.Failure -> {
                                 val ex = result.getException()
                                 Log.d("response", ex.toString())
-                                val myToast: Toast = Toast.makeText(this, "名前変更失敗しました", Toast.LENGTH_LONG)
-                                myToast.show()
+                                Toast.makeText(this, "名前変更失敗しました", Toast.LENGTH_LONG).show()
                             }
 
                             is Result.Success -> {
@@ -76,20 +75,18 @@ class profileActivity : AppCompatActivity(){
                                 Log.d("responce", data)
                                 edit.putString("username", newname)
                                     .apply()
-                                val myToast: Toast = Toast.makeText(this, "名前変更しました", Toast.LENGTH_LONG)
-                                myToast.show()
+                                Toast.makeText(this, "名前変更しました", Toast.LENGTH_LONG).show()
                             }
                         }
                     }
-            })
+                httpAsync.join()
+                finish()
+                val intent = Intent(this, profileActivity::class.java)
+                startActivity(intent)
+                })
             dialog.setNegativeButton("キャンセル", null)
             dialog.show()
-
         }
-        //finish()
-        //val intent = Intent(this, profileActivity::class.java)
-        //startActivity(intent)
-
         idtxt.setText(idset)
         nametxt.setText(username)
     }

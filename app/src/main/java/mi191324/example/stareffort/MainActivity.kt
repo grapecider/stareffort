@@ -111,6 +111,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+            httpAsync.join()
         }
 
         val myrecord: Button = findViewById(R.id.myrecord)
