@@ -54,15 +54,16 @@ class MainActivity : AppCompatActivity() {
         var preference = getSharedPreferences("Preference Name", MODE_PRIVATE)
         var editor = preference.edit()
         //ID作成のための変数
-        val pref = PreferenceManager.getDefaultSharedPreferences(this)
-        val uuid = pref.getString("uuid", "null")
+        //val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
+        //val pref = PreferenceManager.getDefaultSharedPreferences(this)
+        val uuid = shardPreferences.getString("uuid", "null")
 
-        if (preference.getBoolean("Launched", false)==false) {
+        if (preference.getBoolean("Launche", false)==false) {
             //初回起動時の処理
             val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
             startActivity(intent)
             Log.d("TAG", "初回起動")
-            editor.putBoolean("Launched", true)
+            editor.putBoolean("Launche", true)
             editor.commit()
             //ID作成
             createID()
@@ -143,13 +144,15 @@ class MainActivity : AppCompatActivity() {
 
     //IDを作成する関数
     private fun createID(){
-        val pref = PreferenceManager.getDefaultSharedPreferences(this)
-        val edit = pref.edit()
+        val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
+        //val pref = PreferenceManager.getDefaultSharedPreferences(this)
+        val edit = shardPreferences.edit()
         var id:String?
         var uuid:String?
 
         id = UUID.randomUUID().toString()
         uuid = (id.substring(0, 7)) + (id.substring(id.length - 10))
+        Log.d("uuid", uuid)
         edit.putString("uuid", uuid)
             .apply()
     }

@@ -35,11 +35,10 @@ class profileActivity : AppCompatActivity(){
         val changeBtn:Button = findViewById(R.id.changeBtn)
         val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
         val pref = PreferenceManager.getDefaultSharedPreferences(this)
-        val edit = pref.edit()
-        val myid = pref.getString("uuid", "Unknown")
-        val username = pref.getString("username", "Unknown")
+        val edit = shardPreferences.edit()
+        val myid = shardPreferences.getString("uuid", "Unknown")
+        val username = shardPreferences.getString("username", "Unknown")
         val idset = "ID:" + myid
-        var last:Int = 0
 
         changeBtn.setOnClickListener{
             val myedit = EditText(this)
@@ -67,7 +66,9 @@ class profileActivity : AppCompatActivity(){
                             is Result.Failure -> {
                                 val ex = result.getException()
                                 Log.d("response", ex.toString())
-                                Toast.makeText(this, "名前変更失敗しました", Toast.LENGTH_LONG).show()
+                                //Toast.makeText(this, "名前変更失敗しました", Toast.LENGTH_LONG).show()
+                                edit.putString("last", "2")
+                                    .apply()
                             }
 
                             is Result.Success -> {
@@ -75,7 +76,9 @@ class profileActivity : AppCompatActivity(){
                                 Log.d("responce", data)
                                 edit.putString("username", newname)
                                     .apply()
-                                Toast.makeText(this, "名前変更しました", Toast.LENGTH_LONG).show()
+                                //Toast.makeText(this, "名前変更しました", Toast.LENGTH_LONG).show()
+                                edit.putString("last", "1")
+                                    .apply()
                             }
                         }
                     }
@@ -89,6 +92,22 @@ class profileActivity : AppCompatActivity(){
         }
         idtxt.setText(idset)
         nametxt.setText(username)
+        val last = shardPreferences.getString("last", "0")
+        if (last == "1"){
+            Toast.makeText(this, "名前変更しました", Toast.LENGTH_LONG).show()
+            edit.putString("last", "0")
+                .apply()
+            Log.d("last", "1")
+        }
+        else if (last == "2"){
+            Toast.makeText(this, "名前変更失敗しました", Toast.LENGTH_LONG).show()
+            edit.putString("last", "0")
+                .apply()
+            Log.d("last", "2")
+        }
+        else {
+            Log.d("last", "0")
+        }
     }
 
     data class userlist (
