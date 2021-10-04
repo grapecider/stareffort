@@ -58,15 +58,16 @@ class MainActivity : AppCompatActivity() {
         //val pref = PreferenceManager.getDefaultSharedPreferences(this)
         val uuid = shardPreferences.getString("uuid", "null")
 
-        if (preference.getBoolean("Launche", false)==false) {
+        if (preference.getBoolean("Laun", false)==false) {
             //初回起動時の処理
             val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
             startActivity(intent)
             Log.d("TAG", "初回起動")
-            editor.putBoolean("Launche", true)
+            editor.putBoolean("Laun", true)
             editor.commit()
             //ID作成
             createID()
+            finish()
         } else {
             //二回目以降の処理
             Log.d("TAG", "２回以降の起動")
@@ -74,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         Log.d("ID", uuid)
 
         //サーバーにIDと名前を送信
-        if (idpush == "0"){
+        if (idpush == "2"){
             val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/userlist"
             val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
             val requestAdapter = moshi.adapter(userlist::class.java)
@@ -155,6 +156,47 @@ class MainActivity : AppCompatActivity() {
         Log.d("uuid", uuid)
         edit.putString("uuid", uuid)
             .apply()
+        val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/userlist"
+        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+        val requestAdapter = moshi.adapter(userlist::class.java)
+        val header: HashMap<String, String> = hashMapOf("Content-Type" to "application/json")
+        val username = shardPreferences.getString("username", "Unknown")
+        val pushtext = userlist(id = uuid, user = username!!)
+        val httpAsync = (httpurl)
+            .httpPost()
+            .header(header).body(requestAdapter.toJson(pushtext))
+            .responseString{request, response, result ->
+                Log.d("hoge", result.toString())
+                when(result){
+                    is com.github.kittinunf.result.Result.Failure ->{
+                        val ex = result.getException()
+                        Log.d("response", ex.toString())
+                        val myToast: Toast = Toast.makeText(this, "送信失敗しました", Toast.LENGTH_LONG)
+                        myToast.show()
+                        edit.putString("idpush", "2")
+                            .apply()
+                    }
+
+                    is com.github.kittinunf.result.Result.Success -> {
+                        val data = result.get()
+                        Log.d("responce", data)
+                        edit.putString("idpush", "1")
+                            .apply()
+
+                        val idadd:ArrayList<String> = arrayListOf()
+                        val gson = Gson()
+                        idadd.add(uuid)
+                        Log.d("idadd", idadd.toString())
+                        edit.putString("idlist", gson.toJson(idadd))
+                            .apply()
+                        val idlist = shardPreferences.getString("idlist", "[]")
+                        val  idpush = shardPreferences.getString("idpush", "0")
+                        Log.d("idlist", idlist)
+                        Log.d("idpush", idpush)
+                    }
+                }
+            }
+        httpAsync.join()
     }
 
     //permission許可関数
