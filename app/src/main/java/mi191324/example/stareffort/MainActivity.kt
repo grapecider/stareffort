@@ -13,6 +13,7 @@ import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import android.preference.PreferenceManager
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.github.kittinunf.fuel.httpPost
 import com.google.gson.Gson
 import com.squareup.moshi.KotlinJsonAdapterFactory
@@ -44,10 +45,30 @@ class MainActivity : AppCompatActivity() {
             Log.d("permission", "OK")
         }else{
             Log.d("permission", "NO")
-            var intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-            startActivity(intent)
-            intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            startActivity(intent)
+            val dialog1 = AlertDialog.Builder(this)
+                .setTitle("permission許可") // タイトル
+                .setMessage("オーバーレイの設定を許可するために\n設定画面でこのアプリの許可をしてください") // メッセージ
+                .setPositiveButton("OK") { dialog, which -> // OK
+                    var intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+                    startActivity(intent)
+                }
+                .create()
+            // AlertDialogを表示
+            dialog1.show()
+            //var intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+            //startActivity(intent)
+            val dialog2 = AlertDialog.Builder(this)
+                .setTitle("permission許可") // タイトル
+                .setMessage("次に他のアプリ情報取得を許可するために\n設定画面でこのアプリの許可をしてください") // メッセージ
+                .setPositiveButton("OK") { dialog, which -> // OK
+                    intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                    startActivity(intent)
+                }
+                .create()
+            // AlertDialogを表示
+            dialog2.show()
+            //intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            //startActivity(intent)
         }
 
         //初回起動のための変数
