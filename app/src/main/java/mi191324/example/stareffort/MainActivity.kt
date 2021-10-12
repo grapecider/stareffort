@@ -1,31 +1,33 @@
 package mi191324.example.stareffort
 
 import android.app.AppOpsManager
-import android.app.PendingIntent.getActivity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import android.preference.PreferenceManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.RecyclerView
 import com.github.kittinunf.fuel.httpPost
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.activity_homeapp.*
 import java.util.*
 import kotlin.collections.ArrayList
-
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
-    private val PERMISSION_REQUEST_CODE = 1000
+    //private val PERMISSION_REQUEST_CODE = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +38,10 @@ class MainActivity : AppCompatActivity() {
         val edit = shardPreferences.edit()
         var idpush = shardPreferences.getString("idpush", "0")
         val username = shardPreferences.getString("username", "Unknown")
+        val recycle:RecyclerView = findViewById(R.id.recycle)
+        val myrecord: Button = findViewById(R.id.myrecord)
+        val friendrecord: Button = findViewById(R.id.friendsrecord)
+        val setting: Button = findViewById(R.id.setting)
 
         val idlist = shardPreferences.getString("idlist", "[]")
         Log.d("idlist", idlist)
@@ -67,16 +73,12 @@ class MainActivity : AppCompatActivity() {
                 .create()
             // AlertDialogを表示
             dialog2.show()
-            //intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            //startActivity(intent)
         }
 
         //初回起動のための変数
         var preference = getSharedPreferences("Preference Name", MODE_PRIVATE)
         var editor = preference.edit()
         //ID作成のための変数
-        //val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
-        //val pref = PreferenceManager.getDefaultSharedPreferences(this)
         val uuid = shardPreferences.getString("uuid", "null")
 
         if (preference.getBoolean("Laun", false)==false) {
@@ -137,10 +139,6 @@ class MainActivity : AppCompatActivity() {
             httpAsync.join()
         }
 
-        val myrecord: Button = findViewById(R.id.myrecord)
-        val friendrecord: Button = findViewById(R.id.friendsrecord)
-        val setting: Button = findViewById(R.id.setting)
-
         //myrecordボタンを押したらMyrecordActivityへ
         myrecord.setOnClickListener {
             val intent = Intent(this, MyrecordActivity::class.java)
@@ -148,8 +146,7 @@ class MainActivity : AppCompatActivity() {
         }
         //friendrecordボタンを押したらFriendrecordActivityへ
         friendrecord.setOnClickListener {
-            val intent = Intent(this, FriendrecordActivity::class.java)
-            startActivity(intent)
+            friendsstate()
         }
         //4）settingボタンを押したらSettingActivityへ
         setting.setOnClickListener {
@@ -159,8 +156,10 @@ class MainActivity : AppCompatActivity() {
         //バックグラウンド処理開始
         startService(Intent(this@MainActivity, Serviceclass::class.java))
 
-        //edit.putString("idpush", "0")
-        //    .apply()
+        stopService(Intent(this@MainActivity, Serviceclass::class.java))
+        friendsstate()
+        startService(Intent(this@MainActivity, Serviceclass::class.java))
+
         Log.d("firstpush", idpush + username)
     }
 
@@ -243,8 +242,69 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //フレンドの状態一覧表示
+    private fun friendsstate() {
+        //stopService(Intent(this@MainActivity, Serviceclass::class.java))
+        val recycle:RecyclerView = findViewById(R.id.recycle)
+        val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/friendstate_get"
+        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+        val shardPreferences = getSharedPreferences("KEY", MODE_PRIVATE)
+        val gson = Gson()
+        val friendList: java.util.ArrayList<String> = gson.fromJson(shardPreferences.getString("idlist", "[]"),
+            object : TypeToken<List<*>>() {}.type)
+        val requestAdapter = moshi.adapter(ids::class.java)
+        val header: HashMap<String, String> = hashMapOf("Content-Type" to "application/json")
+        val pushtext = MainActivity.ids(ids = friendList)
+        val handler = Handler()
+
+        val httpAsync = httpurl
+            .httpPost()
+            .header(header).body(requestAdapter.toJson(pushtext))
+            .responseString() {request, response, result ->
+                Log.d("hoge", result.toString())
+                when (result){
+                    is com.github.kittinunf.result.Result.Failure -> {
+                        val ex = result.getException()
+                        Log.d("response", ex.toString())
+                }
+                    is com.github.kittinunf.result.Result.Success -> {
+                        val data = result.get()
+                        val res = moshi.adapter(statelistresponce::class.java).fromJson(data)
+                        Log.d("res", res.toString())
+                        thread {
+                            handler.post( Runnable() {
+                                recycle.adapter = statelistAdapter(res!!.response)
+                            })
+                        }
+                        //recycle.adapter = statelistAdapter(res!!.response)
+                    }
+                }
+            }
+        httpAsync.join()
+
+        val mainHandler:Handler = Handler(Looper.getMainLooper())
+
+        Log.d("friendlist", friendList.toString())
+        //startService(Intent(this@MainActivity, Serviceclass::class.java))
+    }
+
     data class userlist (
         val id: String,
         val user: String
+    )
+
+    //フレンド状態一覧取得用のデータリスト
+    data class ids(
+        val ids: List<String>
+    )
+
+    data class statelist(
+        val number: Int,
+        val id: String,
+        val user: String,
+        val state: Int
+    )
+    data class statelistresponce(
+        val response: List<statelist>
     )
 }
