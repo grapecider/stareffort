@@ -62,8 +62,6 @@ class MainActivity : AppCompatActivity() {
                 .create()
             // AlertDialogを表示
             dialog1.show()
-            //var intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-            //startActivity(intent)
             val dialog2 = AlertDialog.Builder(this)
                 .setTitle("permission許可") // タイトル
                 .setMessage("次に他のアプリ情報取得を許可するために\n設定画面でこのアプリの許可をしてください") // メッセージ
@@ -142,8 +140,9 @@ class MainActivity : AppCompatActivity() {
 
         //myrecordボタンを押したらMyrecordActivityへ
         myrecord.setOnClickListener {
-            val intent = Intent(this, MyrecordActivity::class.java)
-            startActivity(intent)
+            //val intent = Intent(this, MyrecordActivity::class.java)
+            //startActivity(intent)
+            friendsstate()
         }
         //friendrecordボタンを押したらFriendrecordActivityへ
         friendrecord.setOnClickListener {
@@ -259,6 +258,7 @@ class MainActivity : AppCompatActivity() {
         val requestAdapter = moshi.adapter(ids::class.java)
         val header: HashMap<String, String> = hashMapOf("Content-Type" to "application/json")
         val pushtext = MainActivity.ids(ids = friendList)
+        Log.d("pushtext", pushtext.toString())
         val handler = Handler()
 
         val httpAsync = httpurl
@@ -295,11 +295,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onParallelGetButtonClick() = GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT,  {
+        val shardPreferences = getSharedPreferences("KEY", MODE_PRIVATE)
+        val gson = Gson()
+        val friendList: java.util.ArrayList<String> = gson.fromJson(shardPreferences.getString("idlist", "[]"),
+            object : TypeToken<List<*>>() {}.type)
+        Log.d("async前", friendList.toString())
         val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/friendstate_get"
         val http = statelistAsyncTask()
-        //val res = http.httpPOST(httpurl).await()
+        val res = http.httpPOST(httpurl, friendList).await()
 
-        //Log.d("responseget", res)
+        Log.d("responseget", res.toString())
     })
 
     data class userlist (
