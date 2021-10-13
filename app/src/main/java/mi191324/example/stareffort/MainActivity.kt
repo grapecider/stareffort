@@ -4,10 +4,7 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.provider.Settings
 import android.util.Log
 import android.widget.Button
@@ -15,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
+import com.eclipsesource.json.Json
 import com.github.kittinunf.fuel.httpPost
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -24,17 +22,20 @@ import kotlinx.android.synthetic.main.activity_homeapp.*
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
+import com.github.kittinunf.result.Result
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-
-    //private val PERMISSION_REQUEST_CODE = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //ID送信のための変数
-        val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
+        val shardPreferences = getSharedPreferences("KEY", MODE_PRIVATE)
         val edit = shardPreferences.edit()
         var idpush = shardPreferences.getString("idpush", "0")
         val username = shardPreferences.getString("username", "Unknown")
@@ -110,14 +111,14 @@ class MainActivity : AppCompatActivity() {
                 .responseString{request, response, result ->
                     Log.d("hoge", result.toString())
                     when(result){
-                        is com.github.kittinunf.result.Result.Failure ->{
+                        is Result.Failure ->{
                             val ex = result.getException()
                             Log.d("response", ex.toString())
                             val myToast: Toast = Toast.makeText(this, "送信失敗しました", Toast.LENGTH_LONG)
                             myToast.show()
                         }
 
-                        is com.github.kittinunf.result.Result.Success -> {
+                        is Result.Success -> {
                             val data = result.get()
                             Log.d("responce", data)
                             edit.putString("idpush", "1")
@@ -146,7 +147,10 @@ class MainActivity : AppCompatActivity() {
         }
         //friendrecordボタンを押したらFriendrecordActivityへ
         friendrecord.setOnClickListener {
-            friendsstate()
+            stopService(Intent(this@MainActivity, Serviceclass::class.java))
+            onParallelGetButtonClick()
+            startService(Intent(this@MainActivity, Serviceclass::class.java))
+            //friendsstate()
         }
         //4）settingボタンを押したらSettingActivityへ
         setting.setOnClickListener {
@@ -156,9 +160,9 @@ class MainActivity : AppCompatActivity() {
         //バックグラウンド処理開始
         startService(Intent(this@MainActivity, Serviceclass::class.java))
 
-        stopService(Intent(this@MainActivity, Serviceclass::class.java))
-        friendsstate()
-        startService(Intent(this@MainActivity, Serviceclass::class.java))
+        //stopService(Intent(this@MainActivity, Serviceclass::class.java))
+        //friendsstate()
+        //startService(Intent(this@MainActivity, Serviceclass::class.java))
 
         Log.d("firstpush", idpush + username)
     }
@@ -188,7 +192,7 @@ class MainActivity : AppCompatActivity() {
             .responseString{request, response, result ->
                 Log.d("hoge", result.toString())
                 when(result){
-                    is com.github.kittinunf.result.Result.Failure ->{
+                    is Result.Failure ->{
                         val ex = result.getException()
                         Log.d("response", ex.toString())
                         val myToast: Toast = Toast.makeText(this, "送信失敗しました", Toast.LENGTH_LONG)
@@ -197,7 +201,7 @@ class MainActivity : AppCompatActivity() {
                             .apply()
                     }
 
-                    is com.github.kittinunf.result.Result.Success -> {
+                    is Result.Success -> {
                         val data = result.get()
                         Log.d("responce", data)
                         edit.putString("idpush", "1")
@@ -263,12 +267,14 @@ class MainActivity : AppCompatActivity() {
             .responseString() {request, response, result ->
                 Log.d("hoge", result.toString())
                 when (result){
-                    is com.github.kittinunf.result.Result.Failure -> {
+                    is Result.Failure -> {
                         val ex = result.getException()
                         Log.d("response", ex.toString())
                 }
-                    is com.github.kittinunf.result.Result.Success -> {
+                    is Result.Success -> {
                         val data = result.get()
+                        //val isUiThread = Thread.currentThread() == Looper.getMainLooper().thread
+                        //println("IS_TREAD: $isUiThread")
                         val res = moshi.adapter(statelistresponce::class.java).fromJson(data)
                         Log.d("res", res.toString())
                         thread {
@@ -287,6 +293,14 @@ class MainActivity : AppCompatActivity() {
         Log.d("friendlist", friendList.toString())
         //startService(Intent(this@MainActivity, Serviceclass::class.java))
     }
+
+    fun onParallelGetButtonClick() = GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT,  {
+        val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/friendstate_get"
+        val http = statelistAsyncTask()
+        //val res = http.httpPOST(httpurl).await()
+
+        //Log.d("responseget", res)
+    })
 
     data class userlist (
         val id: String,

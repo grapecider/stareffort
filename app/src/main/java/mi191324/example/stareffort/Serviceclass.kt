@@ -27,15 +27,6 @@ class Serviceclass : Service() {
     var view: View? = null
     var wm: WindowManager? = null
 
-    /*private val layoutParams = WindowManager.LayoutParams(
-        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,  // Overlay レイヤに表示
-        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE  // フォーカスを奪わない
-                or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,  // 画面外への拡張を許可
-        PixelFormat.TRANSLUCENT
-    )*/
-    //val windowManager: WindowManager by lazy { applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     companion object {
         private const val ACTION_SHOW = "SHOW"
         private const val ACTION_HIDE = "HIDE"
@@ -92,16 +83,16 @@ class Serviceclass : Service() {
                 val pkgs = allappget()
                 //overlay()
                 mHandler.post {
-                    Log.d("TestService", "Timer run")
+                    //Log.d("TestService", "Timer run")
                     Log.d("pkgs", pkgs.toString())
                     for (app in pkgs) {
-                        Log.d("for", forapp)
+                        //Log.d("for", forapp)
                         if (app == forapp.toString()) {
                             i = "in"
-                            Log.d("jug", "in")
+                            //Log.d("jug", "in")
                             break
                         } else{
-                            Log.d("jug", "out")
+                            //Log.d("jug", "out")
                         }
                     }
                     if (i == "in"){
@@ -118,7 +109,7 @@ class Serviceclass : Service() {
                     i = "out"
                 }
             }
-        }, 10000, 1000)
+        }, 10000, 10000)
         return START_STICKY
     }
 
@@ -133,7 +124,7 @@ class Serviceclass : Service() {
 
     //フォアグランドアプリ取得
     private fun printForegroundTask(): String? {
-        val applist = allappget()
+        //val applist = allappget()
         var currentApp = "NULL"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val usm = this.getSystemService("usagestats"!!) as UsageStatsManager
@@ -167,7 +158,7 @@ class Serviceclass : Service() {
             object : TypeToken<List<*>>() {}.type
         )
         var applist = arrayListOf<String>()
-        var i:Int = 1
+        var i = 1
         while (i < NameList.size){
             if (NameList.get(i).toString() == "false"){
                 i -= 1
