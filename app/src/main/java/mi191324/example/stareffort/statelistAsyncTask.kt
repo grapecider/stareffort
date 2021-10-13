@@ -19,6 +19,7 @@ class statelistAsyncTask {
             val response = client.newCall(request).execute()
 
             val responseBody = response.body?.toString().orEmpty()
+            Log.d("resBody", responseBody)
 
             return@async responseBody
         })
