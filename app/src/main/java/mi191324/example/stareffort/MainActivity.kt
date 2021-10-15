@@ -7,26 +7,25 @@ import android.content.pm.PackageManager
 import android.os.*
 import android.provider.Settings
 import android.util.Log
+import android.view.LayoutInflater
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.eclipsesource.json.Json
 import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 import kotlinx.android.synthetic.main.activity_homeapp.*
+import kotlinx.coroutines.*
+import java.lang.Runnable
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
-import com.github.kittinunf.result.Result
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -106,10 +105,10 @@ class MainActivity : AppCompatActivity() {
             val httpAsync = (httpurl)
                 .httpPost()
                 .header(header).body(requestAdapter.toJson(pushtext))
-                .responseString{request, response, result ->
+                .responseString{ request, response, result ->
                     Log.d("hoge", result.toString())
                     when(result){
-                        is Result.Failure ->{
+                        is Result.Failure -> {
                             val ex = result.getException()
                             Log.d("response", ex.toString())
                             val myToast: Toast = Toast.makeText(this, "送信失敗しました", Toast.LENGTH_LONG)
@@ -122,14 +121,14 @@ class MainActivity : AppCompatActivity() {
                             edit.putString("idpush", "1")
                                 .apply()
 
-                            val idadd:ArrayList<String> = arrayListOf()
+                            val idadd: ArrayList<String> = arrayListOf()
                             val gson = Gson()
                             idadd.add(uuid)
                             Log.d("idadd", idadd.toString())
                             edit.putString("idlist", gson.toJson(idadd))
                                 .apply()
                             val idlist = shardPreferences.getString("idlist", "[]")
-                            val  idpush = shardPreferences.getString("idpush", "0")
+                            val idpush = shardPreferences.getString("idpush", "0")
                             Log.d("idlist", idlist)
                             Log.d("idpush", idpush)
                         }
@@ -188,10 +187,10 @@ class MainActivity : AppCompatActivity() {
         val httpAsync = (httpurl)
             .httpPost()
             .header(header).body(requestAdapter.toJson(pushtext))
-            .responseString{request, response, result ->
+            .responseString{ request, response, result ->
                 Log.d("hoge", result.toString())
                 when(result){
-                    is Result.Failure ->{
+                    is Result.Failure -> {
                         val ex = result.getException()
                         Log.d("response", ex.toString())
                         val myToast: Toast = Toast.makeText(this, "送信失敗しました", Toast.LENGTH_LONG)
@@ -206,14 +205,14 @@ class MainActivity : AppCompatActivity() {
                         edit.putString("idpush", "1")
                             .apply()
 
-                        val idadd:ArrayList<String> = arrayListOf()
+                        val idadd: ArrayList<String> = arrayListOf()
                         val gson = Gson()
                         idadd.add(uuid)
                         Log.d("idadd", idadd.toString())
                         edit.putString("idlist", gson.toJson(idadd))
                             .apply()
                         val idlist = shardPreferences.getString("idlist", "[]")
-                        val  idpush = shardPreferences.getString("idpush", "0")
+                        val idpush = shardPreferences.getString("idpush", "0")
                         Log.d("idlist", idlist)
                         Log.d("idpush", idpush)
                     }
@@ -253,8 +252,13 @@ class MainActivity : AppCompatActivity() {
         val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
         val shardPreferences = getSharedPreferences("KEY", MODE_PRIVATE)
         val gson = Gson()
-        val friendList: java.util.ArrayList<String> = gson.fromJson(shardPreferences.getString("idlist", "[]"),
-            object : TypeToken<List<*>>() {}.type)
+        val friendList: java.util.ArrayList<String> = gson.fromJson(
+            shardPreferences.getString(
+                "idlist",
+                "[]"
+            ),
+            object : TypeToken<List<*>>() {}.type
+        )
         val requestAdapter = moshi.adapter(ids::class.java)
         val header: HashMap<String, String> = hashMapOf("Content-Type" to "application/json")
         val pushtext = MainActivity.ids(ids = friendList)
@@ -264,13 +268,13 @@ class MainActivity : AppCompatActivity() {
         val httpAsync = httpurl
             .httpPost()
             .header(header).body(requestAdapter.toJson(pushtext))
-            .responseString() {request, response, result ->
+            .responseString() { request, response, result ->
                 Log.d("hoge", result.toString())
                 when (result){
                     is Result.Failure -> {
                         val ex = result.getException()
                         Log.d("response", ex.toString())
-                }
+                    }
                     is Result.Success -> {
                         val data = result.get()
                         //val isUiThread = Thread.currentThread() == Looper.getMainLooper().thread
@@ -278,7 +282,7 @@ class MainActivity : AppCompatActivity() {
                         val res = moshi.adapter(statelistresponce::class.java).fromJson(data)
                         Log.d("res", res.toString())
                         thread {
-                            handler.post( Runnable() {
+                            handler.post(Runnable() {
                                 recycle.adapter = statelistAdapter(res!!.response)
                             })
                         }
@@ -294,20 +298,85 @@ class MainActivity : AppCompatActivity() {
         //startService(Intent(this@MainActivity, Serviceclass::class.java))
     }
 
-    fun onParallelGetButtonClick() = GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT,  {
+    fun onParallelGetButtonClick() = GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, {
         val shardPreferences = getSharedPreferences("KEY", MODE_PRIVATE)
         val gson = Gson()
-        val friendList: java.util.ArrayList<String> = gson.fromJson(shardPreferences.getString("idlist", "[]"),
-            object : TypeToken<List<*>>() {}.type)
+        val friendList: java.util.ArrayList<String> = gson.fromJson(
+            shardPreferences.getString(
+                "idlist",
+                "[]"
+            ),
+            object : TypeToken<List<*>>() {}.type
+        )
         Log.d("async前", friendList.toString())
-        val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/friendstate_get"
+        val httpurl =
+            "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/friendstate_get"
         val http = statelistAsyncTask()
-        val res = http.httpPOST(httpurl, friendList).await()
+        val res = POST(httpurl, friendList).await()
 
-        Log.d("responseget", res.toString())
+        Log.d("responseget", res)
     })
 
-    data class userlist (
+    fun POST(url: String, flist: ArrayList<String>) : Deferred<String> = GlobalScope.async(
+        Dispatchers.Default,
+        CoroutineStart.DEFAULT,
+        {
+            //val handler = Handler()
+
+            val recycle: RecyclerView = findViewById(R.id.recycle)
+            var respon = "null"
+            val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+            val requestAdapter = moshi.adapter(MainActivity.ids::class.java)
+            val header: HashMap<String, String> = hashMapOf("Content-Type" to "application/json")
+            val pushtext = MainActivity.ids(ids = flist)
+            val httpAsync = url
+                .httpPost()
+                .header(header).body(requestAdapter.toJson(pushtext))
+                .responseString() { request, response, result ->
+                    Log.d("hoge", result.toString())
+                    when (result) {
+                        is Result.Failure -> {
+                            val ex = result.getException()
+                            Log.d("response", ex.toString())
+                        }
+                        is Result.Success -> {
+                            val data = result.get()
+                            val res =
+                                moshi.adapter(MainActivity.statelistresponce::class.java).fromJson(
+                                    data
+                                )
+                            Log.d("res", res.toString())
+                            recycleview(res)
+                            respon = res.toString()
+                            runOnUiThread(Runnable() {
+                                run() {
+                                    //recycle.adapter = statelistAdapter(res!!.response)
+                                }
+                            })
+                            runOnUiThread {
+                                recycle.layoutManager = LinearLayoutManager(this@MainActivity)
+                                recycle.adapter = statelistAdapter(res!!.response)
+                            }
+                        }
+                    }
+                }
+            httpAsync.join()
+
+            return@async respon
+        })
+
+    fun recycleview(getres: statelistresponce?){
+        Log.d("getres", getres.toString())
+        val recycle: RecyclerView = findViewById(R.id.recycle)
+        //val handler = Handler()
+        runOnUiThread(Runnable() {
+            run() {
+                recycle.adapter = statelistAdapter(getres!!.response)
+            }
+        })
+    }
+
+    data class userlist(
         val id: String,
         val user: String
     )
