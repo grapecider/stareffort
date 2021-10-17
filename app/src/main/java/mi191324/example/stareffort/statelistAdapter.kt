@@ -1,15 +1,23 @@
 package mi191324.example.stareffort
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
+
 
 class statelistAdapter(private val stateList: List<MainActivity.statelist>): RecyclerView.Adapter<statelistAdapter.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.friend_state_card, parent, false)
+        val itemView = LayoutInflater.from(parent.context).inflate(
+            R.layout.friend_state_card,
+            parent,
+            false
+        )
 
         return ViewHolder(itemView)
     }
@@ -27,10 +35,18 @@ class statelistAdapter(private val stateList: List<MainActivity.statelist>): Rec
         Log.d("adapter_", currentItem.id)
         Log.d("adapter_", currentItem.user)
         Log.d("adapter_", currentItem.state.toString())
+
+        holder.itemView.setOnClickListener {
+                v:View -> Unit
+            var context = v.context
+            val intent = Intent(context, studytimeFragment::class.java)
+            //context.startActivity(intent)
+            context.startActivity(Intent(context, studytimeFragment::class.java))
+        }
     }
     override fun getItemCount() = stateList.size
 
-    class ViewHolder(itemView:View) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView1: TextView = itemView.findViewById(R.id.text1)
         val textView2: TextView = itemView.findViewById(R.id.text2)
         val textView3: TextView = itemView.findViewById(R.id.text3)

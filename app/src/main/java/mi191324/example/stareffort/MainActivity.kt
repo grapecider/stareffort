@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.os.*
 import android.provider.Settings
 import android.util.Log
-import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -141,14 +140,13 @@ class MainActivity : AppCompatActivity() {
         myrecord.setOnClickListener {
             //val intent = Intent(this, MyrecordActivity::class.java)
             //startActivity(intent)
-            friendsstate()
+            //friendsstate()
         }
         //friendrecordボタンを押したらFriendrecordActivityへ
         friendrecord.setOnClickListener {
             stopService(Intent(this@MainActivity, Serviceclass::class.java))
             onParallelGetButtonClick()
             startService(Intent(this@MainActivity, Serviceclass::class.java))
-            //friendsstate()
         }
         //4）settingボタンを押したらSettingActivityへ
         setting.setOnClickListener {
@@ -158,9 +156,8 @@ class MainActivity : AppCompatActivity() {
         //バックグラウンド処理開始
         startService(Intent(this@MainActivity, Serviceclass::class.java))
 
-        //stopService(Intent(this@MainActivity, Serviceclass::class.java))
-        //friendsstate()
-        //startService(Intent(this@MainActivity, Serviceclass::class.java))
+        onParallelGetButtonClick()
+
 
         Log.d("firstpush", idpush + username)
     }
@@ -292,7 +289,7 @@ class MainActivity : AppCompatActivity() {
             }
         httpAsync.join()
 
-        val mainHandler:Handler = Handler(Looper.getMainLooper())
+        //val mainHandler:Handler = Handler(Looper.getMainLooper())
 
         Log.d("friendlist", friendList.toString())
         //startService(Intent(this@MainActivity, Serviceclass::class.java))
