@@ -40,8 +40,8 @@ class statelistAdapter(private val stateList: List<MainActivity.statelist>): Rec
                 v:View -> Unit
             var context = v.context
             val intent = Intent(context, studytimeFragment::class.java)
-            //context.startActivity(intent)
-            context.startActivity(Intent(context, studytimeFragment::class.java))
+            intent.putExtra("id", currentItem.id)
+            context.startActivity(intent)
         }
     }
     override fun getItemCount() = stateList.size

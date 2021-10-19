@@ -138,17 +138,16 @@ class MainActivity : AppCompatActivity() {
 
         //myrecordボタンを押したらMyrecordActivityへ
         myrecord.setOnClickListener {
-            //val intent = Intent(this, MyrecordActivity::class.java)
-            //startActivity(intent)
-            //friendsstate()
+            val intent = Intent(this, MyrecordActivity::class.java)
+            startActivity(intent)
         }
-        //friendrecordボタンを押したらFriendrecordActivityへ
+        //friendrecordボタンを押したら友達の状態再取得
         friendrecord.setOnClickListener {
             stopService(Intent(this@MainActivity, Serviceclass::class.java))
             onParallelGetButtonClick()
             startService(Intent(this@MainActivity, Serviceclass::class.java))
         }
-        //4）settingボタンを押したらSettingActivityへ
+        //4）settingボタンを押したら設定画面(SettingActivity)へ
         setting.setOnClickListener {
             val intent = Intent(this, SettingActivity::class.java)
             startActivity(intent)
@@ -241,60 +240,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //フレンドの状態一覧表示
-    private fun friendsstate() {
-        //stopService(Intent(this@MainActivity, Serviceclass::class.java))
-        val recycle:RecyclerView = findViewById(R.id.recycle)
-        val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/friendstate_get"
-        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-        val shardPreferences = getSharedPreferences("KEY", MODE_PRIVATE)
-        val gson = Gson()
-        val friendList: java.util.ArrayList<String> = gson.fromJson(
-            shardPreferences.getString(
-                "idlist",
-                "[]"
-            ),
-            object : TypeToken<List<*>>() {}.type
-        )
-        val requestAdapter = moshi.adapter(ids::class.java)
-        val header: HashMap<String, String> = hashMapOf("Content-Type" to "application/json")
-        val pushtext = MainActivity.ids(ids = friendList)
-        Log.d("pushtext", pushtext.toString())
-        val handler = Handler()
-
-        val httpAsync = httpurl
-            .httpPost()
-            .header(header).body(requestAdapter.toJson(pushtext))
-            .responseString() { request, response, result ->
-                Log.d("hoge", result.toString())
-                when (result){
-                    is Result.Failure -> {
-                        val ex = result.getException()
-                        Log.d("response", ex.toString())
-                    }
-                    is Result.Success -> {
-                        val data = result.get()
-                        //val isUiThread = Thread.currentThread() == Looper.getMainLooper().thread
-                        //println("IS_TREAD: $isUiThread")
-                        val res = moshi.adapter(statelistresponce::class.java).fromJson(data)
-                        Log.d("res", res.toString())
-                        thread {
-                            handler.post(Runnable() {
-                                recycle.adapter = statelistAdapter(res!!.response)
-                            })
-                        }
-                        //recycle.adapter = statelistAdapter(res!!.response)
-                    }
-                }
-            }
-        httpAsync.join()
-
-        //val mainHandler:Handler = Handler(Looper.getMainLooper())
-
-        Log.d("friendlist", friendList.toString())
-        //startService(Intent(this@MainActivity, Serviceclass::class.java))
-    }
-
     fun onParallelGetButtonClick() = GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, {
         val shardPreferences = getSharedPreferences("KEY", MODE_PRIVATE)
         val gson = Gson()
@@ -343,7 +288,7 @@ class MainActivity : AppCompatActivity() {
                                     data
                                 )
                             Log.d("res", res.toString())
-                            recycleview(res)
+                            //recycleview(res)
                             respon = res.toString()
                             runOnUiThread(Runnable() {
                                 run() {
