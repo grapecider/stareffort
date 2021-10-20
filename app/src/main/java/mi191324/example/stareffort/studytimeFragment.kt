@@ -1,41 +1,33 @@
 package mi191324.example.stareffort
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.utils.ColorTemplate
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
+import kotlinx.android.synthetic.main.activity_homeapp.view.*
 import kotlinx.android.synthetic.main.activity_myrecord.*
 import kotlinx.coroutines.*
 import java.lang.Runnable
-import java.util.HashMap
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 class studytimeFragment : AppCompatActivity() {
-
-    lateinit var barList: ArrayList<BarEntry>
-    lateinit var barDataSet: BarDataSet
-    lateinit var barData: BarData
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,18 +54,24 @@ class studytimeFragment : AppCompatActivity() {
 
     }
 
-    fun onParallelGetButtonClick(id:String) = GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, {
-        val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/studytime_allget"
-        val res = POST(httpurl, id).await()
+    fun onParallelGetButtonClick(id: String) = GlobalScope.launch(
+        Dispatchers.Main,
+        CoroutineStart.DEFAULT,
+        {
+            val httpurl =
+                "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/studytime_allget"
+            val res = POST(httpurl, id).await()
 
-        Log.d("responseget", res)
-    })
+            Log.d("responseget", res)
+        })
 
     fun POST(url: String, thisid: String) : Deferred<String> = GlobalScope.async(
         Dispatchers.Default,
         CoroutineStart.DEFAULT,
         {
-            val barChart:BarChart = findViewById(R.id.barChart)
+            val entries = ArrayList<BarEntry>()
+            val labels: ArrayList<String> = ArrayList()
+            val barChart: BarChart = findViewById(R.id.barChart)
             var respon = "null"
             val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
             val requestAdapter = moshi.adapter(sendid::class.java)
@@ -92,30 +90,31 @@ class studytimeFragment : AppCompatActivity() {
                         is Result.Success -> {
                             val data = result.get()
                             val res = moshi.adapter(responcelist::class.java).fromJson(data)
-                            Log.d("res", res.toString())
-                            Log.d("size", (res).toString())
+                            var count = 0.01
+                            for (i in res!!.response) {
+                                labels.add(i.year.toString() + "/" + i.month.toString() + "/" + i.day.toString())
+                                entries.add(BarEntry(count.toFloat(), i.time.toFloat()))
+                                count++
+                            }
                             runOnUiThread(Runnable() {
                                 run() {
-                                    //recycle.adapter = statelistAdapter(res!!.response)
                                 }
                             })
                             runOnUiThread {
-                                barList = ArrayList()
-                                //barList.add(BarEntry(1, 5))
-                                barList.add(BarEntry(2f, 100f))
-                                barList.add(BarEntry(3f, 300f))
-                                barList.add(BarEntry(4f, 800f))
-                                barList.add(BarEntry(5f, 400f))
-                                barList.add(BarEntry(6f, 1000f))
-                                barList.add(BarEntry(7f, 800f))
-                                barDataSet = BarDataSet(barList, "Population")
-                                barData = BarData(barDataSet)
-                                barChart.data = barData
-                                barDataSet.setColors(ColorTemplate.JOYFUL_COLORS, 250)
-                                barDataSet.valueTextColor = Color.BLACK
-                                barDataSet.valueTextSize = 15f
-                                //recycle.layoutManager = LinearLayoutManager(this@MainActivity)
-                                //recycle.adapter = statelistAdapter(res!!.response)
+                                Log.d("x", labels.toString())
+
+                                barChart.xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+                                barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+                                barChart.setDrawGridBackground(false)
+                                barChart.axisLeft.isEnabled = false
+                                barChart.axisRight.isEnabled = false
+                                barChart.description.isEnabled = false
+                                val set = BarDataSet(entries, "")
+                                set.valueTextSize = 10f
+
+                                barChart.data = BarData(set)
+                                barChart.invalidate()
+
                             }
                         }
                     }
