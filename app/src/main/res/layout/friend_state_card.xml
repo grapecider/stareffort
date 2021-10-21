@@ -13,8 +13,8 @@
 
         <TextView
             android:id="@+id/text1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="100dp"
+            android:layout_height="20dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
@@ -27,8 +27,8 @@
 
         <TextView
             android:id="@+id/text2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="70dp"
+            android:layout_height="20dp"
             android:layout_marginStart="30dp"
             android:layout_marginLeft="104dp"
             android:layout_marginTop="25dp"
@@ -40,8 +40,8 @@
         <TextView
             android:id="@+id/text3"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="50dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="30dp"
             android:layout_marginLeft="40dp"
             android:layout_marginTop="15dp"
             android:layout_toEndOf="@id/text2"

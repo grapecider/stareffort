@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity() {
         var idpush = shardPreferences.getString("idpush", "0")
         val username = shardPreferences.getString("username", "Unknown")
         val recycle:RecyclerView = findViewById(R.id.recycle)
-        val myrecord: Button = findViewById(R.id.myrecord)
         val friendrecord: Button = findViewById(R.id.friendsrecord)
         val setting: Button = findViewById(R.id.setting)
 
@@ -136,11 +135,6 @@ class MainActivity : AppCompatActivity() {
             httpAsync.join()
         }
 
-        //myrecordボタンを押したらMyrecordActivityへ
-        myrecord.setOnClickListener {
-            val intent = Intent(this, MyrecordActivity::class.java)
-            startActivity(intent)
-        }
         //friendrecordボタンを押したら友達の状態再取得
         friendrecord.setOnClickListener {
             stopService(Intent(this@MainActivity, Serviceclass::class.java))
