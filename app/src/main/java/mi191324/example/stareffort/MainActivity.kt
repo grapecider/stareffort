@@ -148,16 +148,12 @@ class MainActivity : AppCompatActivity() {
         }
         //バックグラウンド処理開始
         startService(Intent(this@MainActivity, Serviceclass::class.java))
-        /*
+
         val notifystate = shardPreferences.getString("btnstate", "0")
         Log.d("noti", notifystate)
-        if (notifystate == "0"){
-            stopService(Intent(this@MainActivity, Serviceclass::class.java))
-        }
-        else if (notifystate == "1"){
+        if (notifystate == "1"){
             startService(Intent(this@MainActivity, Service_friendstate::class.java))
-        }*/
-        stopService(Intent(this@MainActivity, Service_friendstate::class.java))
+        }
 
         onParallelGetButtonClick()
 

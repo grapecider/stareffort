@@ -66,16 +66,17 @@ class Service_friendstate : Service() {
                 if (mTimer.toString() == "null"){
                     Log.d("うんち", "うん")
                     stopSelf()
+
                 }
             }
-        }, 1000, 5000)
+        }, 1000, 100)
         return START_NOT_STICKY
     }
 
     override fun onDestroy() {
         Log.d("stopppp", "stop")
         super.onDestroy()
-        mTimer = null
+        mTimer!!.cancel()
         stopSelf()
     }
     override fun stopService(name: Intent?): Boolean {

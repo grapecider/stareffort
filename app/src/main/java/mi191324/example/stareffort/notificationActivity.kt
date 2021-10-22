@@ -75,14 +75,6 @@ class notificationActivity : AppCompatActivity() {
                 var myServiceBinder: Service_friendstate
 
                 stopService(Intent(this, Service_friendstate::class.java))
-                //unbindService(Intent(this, Service_friendstate::class.java))
-                applicationContext.stopService(
-                    Intent(
-                        getBaseContext(),
-                        Service_friendstate::class.java
-                    )
-
-                )
             }
         }
         //戻るボタン（アクティビティの終了）
