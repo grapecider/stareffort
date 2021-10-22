@@ -11,8 +11,9 @@ import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
-import android.widget.Toast
+import java.lang.NullPointerException
 import java.util.*
+import kotlin.reflect.jvm.internal.impl.resolve.constants.NullValue
 
 
 class Service_friendstate : Service() {
@@ -25,17 +26,17 @@ class Service_friendstate : Service() {
         private const val ACTION_HIDE = "HIDE"
 
         fun start(context: Context) {
-            val intent = Intent(context, Serviceclass::class.java).apply {
+            val intent = Intent(context, Service_friendstate::class.java).apply {
                 action = ACTION_SHOW
             }
             context.startService(intent)
         }
 
         fun stop(context: Context) {
-            val intent = Intent(context, Serviceclass::class.java).apply {
+            val intent = Intent(context, Service_friendstate::class.java).apply {
                 action = ACTION_HIDE
             }
-            context.startService(intent)
+            context.stopService(intent)
         }
 
         // To control toggle button in MainActivity. This is not elegant but works.
@@ -54,26 +55,40 @@ class Service_friendstate : Service() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.i("TestService", "onStartCommand")
         val layoutInflater = LayoutInflater.from(this)
-        //val wm = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         view = layoutInflater.inflate(R.layout.overlay, null)
         mTimer = Timer(true)
         mTimer!!.schedule(object : TimerTask() {
             override fun run() {
                 mHandler.post {
-                    Log.d("TestService", "Timer run")
+                    Log.d("TestService", "Timerrunn!!!")
                     Log.d("^_^", "雑魚乙")
                 }
+                if (mTimer.toString() == "null"){
+                    Log.d("うんち", "うん")
+                    stopSelf()
+                }
             }
-        }, 1000, 10000)
-        return START_STICKY
+        }, 1000, 5000)
+        return START_NOT_STICKY
     }
 
     override fun onDestroy() {
-        Log.i("TestService", "onDestroy")
+        Log.d("stopppp", "stop")
+        super.onDestroy()
+        mTimer = null
+        stopSelf()
+    }
+    override fun stopService(name: Intent?): Boolean {
+        Log.d("stop", "stop")
+        return super.stopService(name)
     }
 
     override fun onBind(arg0: Intent): IBinder? {
         Log.i("TestService", "onBind")
         return null
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        return true
     }
 }

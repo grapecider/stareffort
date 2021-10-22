@@ -2,10 +2,13 @@ package mi191324.example.stareffort
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import android.widget.Button
 import android.widget.ToggleButton
@@ -13,10 +16,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
+
 class notificationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification)
+
+        stopService(Intent(this@notificationActivity, Serviceclass::class.java))
 
         val btnBack : Button = findViewById(R.id.returnBtn)
         val notifiBtn: ToggleButton = findViewById(R.id.notifiBtn)
@@ -66,7 +72,17 @@ class notificationActivity : AppCompatActivity() {
                 Log.d("button", "NO")
                 edit.putString("btnstate", "0")
                     .apply()
-                stopService(Intent(this@notificationActivity, Service_friendstate::class.java))
+                var myServiceBinder: Service_friendstate
+
+                stopService(Intent(this, Service_friendstate::class.java))
+                //unbindService(Intent(this, Service_friendstate::class.java))
+                applicationContext.stopService(
+                    Intent(
+                        getBaseContext(),
+                        Service_friendstate::class.java
+                    )
+
+                )
             }
         }
         //戻るボタン（アクティビティの終了）
