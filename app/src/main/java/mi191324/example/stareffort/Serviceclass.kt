@@ -1,6 +1,8 @@
 package mi191324.example.stareffort
 
 import android.app.ActivityManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
@@ -17,8 +19,12 @@ import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.time.LocalDateTime
 import java.util.*
 
 
@@ -58,8 +64,12 @@ class Serviceclass : Service() {
         Log.i("TestService", "onCreate")
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         Log.i("TestService", "onStartCommand")
+        val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
+        val edit = shardPreferences.edit()
+        var b_time = LocalDateTime.now()
         var i = "out"
         var I = 0
         val layoutInflater = LayoutInflater.from(this)
@@ -74,25 +84,58 @@ class Serviceclass : Service() {
         )
         val wm = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         view = layoutInflater.inflate(R.layout.overlay, null)
-        var appname: String
+        //通知に関する変数
+        val CHANNEL_ID = "channel_id"
+        val channel_name = "channel_name"
+        val channel_description = "channel_description "
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = channel_name
+            val descriptionText = channel_description
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            /// チャネルを登録
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+        var notificationId = 0
+
         mTimer = Timer(true)
         mTimer!!.schedule(object : TimerTask() {
             override fun run() {
                 val forapp = printForegroundTask()
-                val prefapplist = getprefapps()
+                val btnstate = shardPreferences.getString("btnstate", "0")
+                val username = shardPreferences.getString("username", "Unknown")
                 val pkgs = allappget()
                 //overlay()
                 mHandler.post {
-                    //Log.d("TestService", "Timer run")
+                    Log.d("btnの結果", btnstate)
+                    if (btnstate == "1"){
+                        var a_time = LocalDateTime.now()
+                        val line = a_time.minute - b_time.minute
+                        Log.d("line", line.toString())
+                        if (line == 5) {
+                            val builder = NotificationCompat.Builder(this@Serviceclass, CHANNEL_ID)
+                                .setSmallIcon(R.drawable.ic_launcher_background)
+                                .setContentTitle(username + "さん")
+                                .setContentText("（Ｕ＾ω＾）わんわんお！")
+                                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                            with(NotificationManagerCompat.from(this@Serviceclass)) {
+                                notify(notificationId, builder.build())
+                                notificationId += 1
+                            }
+                            b_time = a_time
+                        }
+                    }
                     Log.d("pkgs", pkgs.toString())
                     for (app in pkgs) {
                         //Log.d("for", forapp)
                         if (app == forapp.toString()) {
                             i = "in"
-                            //Log.d("jug", "in")
                             break
                         } else{
-                            //Log.d("jug", "out")
                         }
                     }
                     if (i == "in"){
@@ -109,7 +152,7 @@ class Serviceclass : Service() {
                     i = "out"
                 }
             }
-        }, 10000, 10000)
+        }, 10000, 20000)
         return START_STICKY
     }
 

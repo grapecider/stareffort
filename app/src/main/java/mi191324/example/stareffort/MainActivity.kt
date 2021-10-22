@@ -137,9 +137,9 @@ class MainActivity : AppCompatActivity() {
 
         //friendrecordボタンを押したら友達の状態再取得
         friendrecord.setOnClickListener {
-            stopService(Intent(this@MainActivity, Serviceclass::class.java))
+            //stopService(Intent(this@MainActivity, Serviceclass::class.java))
             onParallelGetButtonClick()
-            startService(Intent(this@MainActivity, Serviceclass::class.java))
+            //startService(Intent(this@MainActivity, Serviceclass::class.java))
         }
         //4）settingボタンを押したら設定画面(SettingActivity)へ
         setting.setOnClickListener {
@@ -148,6 +148,16 @@ class MainActivity : AppCompatActivity() {
         }
         //バックグラウンド処理開始
         startService(Intent(this@MainActivity, Serviceclass::class.java))
+        /*
+        val notifystate = shardPreferences.getString("btnstate", "0")
+        Log.d("noti", notifystate)
+        if (notifystate == "0"){
+            stopService(Intent(this@MainActivity, Serviceclass::class.java))
+        }
+        else if (notifystate == "1"){
+            startService(Intent(this@MainActivity, Service_friendstate::class.java))
+        }*/
+        stopService(Intent(this@MainActivity, Service_friendstate::class.java))
 
         onParallelGetButtonClick()
 

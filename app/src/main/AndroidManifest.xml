@@ -32,7 +32,7 @@
             </intent-filter>
         </activity>
         <service android:name=".Serviceclass" />
-        <service android:name=".overlayservice" />
+        <service android:name=".Service_friendstate" />
     </application>
 
 </manifest>
