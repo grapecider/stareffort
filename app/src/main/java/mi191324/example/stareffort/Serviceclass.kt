@@ -22,8 +22,13 @@ import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.squareup.moshi.KotlinJsonAdapterFactory
+import com.squareup.moshi.Moshi
+import kotlinx.coroutines.*
 import java.time.LocalDateTime
 import java.util.*
 
@@ -32,6 +37,7 @@ class Serviceclass : Service() {
     private lateinit var surfaceView: SurfaceView
     var view: View? = null
     var wm: WindowManager? = null
+    var onlinestate:Int = 0
 
     companion object {
         private const val ACTION_SHOW = "SHOW"
@@ -84,61 +90,25 @@ class Serviceclass : Service() {
         )
         val wm = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         view = layoutInflater.inflate(R.layout.overlay, null)
-        //通知に関する変数
-        val CHANNEL_ID = "channel_id"
-        val channel_name = "channel_name"
-        val channel_description = "channel_description "
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = channel_name
-            val descriptionText = channel_description
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-            /// チャネルを登録
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-        var notificationId = 0
 
         mTimer = Timer(true)
         mTimer!!.schedule(object : TimerTask() {
             override fun run() {
                 val forapp = printForegroundTask()
-                val btnstate = shardPreferences.getString("btnstate", "0")
-                val username = shardPreferences.getString("username", "Unknown")
                 val pkgs = allappget()
-                //overlay()
                 mHandler.post {
-                    Log.d("btnの結果", btnstate)
-                    if (btnstate == "1"){
-                        var a_time = LocalDateTime.now()
-                        val line = a_time.minute - b_time.minute
-                        Log.d("line", line.toString())
-                        if (line == 5) {
-                            val builder = NotificationCompat.Builder(this@Serviceclass, CHANNEL_ID)
-                                .setSmallIcon(R.drawable.ic_launcher_background)
-                                .setContentTitle(username + "さん")
-                                .setContentText("（Ｕ＾ω＾）わんわんお！")
-                                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                            with(NotificationManagerCompat.from(this@Serviceclass)) {
-                                notify(notificationId, builder.build())
-                                notificationId += 1
-                            }
-                            b_time = a_time
-                        }
-                    }
                     Log.d("pkgs", pkgs.toString())
-                    for (app in pkgs) {
-                        //Log.d("for", forapp)
-                        if (app == forapp.toString()) {
-                            i = "in"
-                            break
-                        } else{
+                    onParallelGetButtonClick()
+                    Log.d("state", onlinestate.toString())
+                    if (onlinestate == 1) {
+                        for (app in pkgs) {
+                            if (app == forapp.toString()) {
+                                i = "in"
+                                break
+                            }
                         }
                     }
-                    if (i == "in"){
+                    if (i == "in") {
                         if (I == 0) {
                             wm.addView(view, params)
                             I = 1
@@ -167,7 +137,6 @@ class Serviceclass : Service() {
 
     //フォアグランドアプリ取得
     private fun printForegroundTask(): String? {
-        //val applist = allappget()
         var currentApp = "NULL"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val usm = this.getSystemService("usagestats"!!) as UsageStatsManager
@@ -249,5 +218,50 @@ class Serviceclass : Service() {
         val view: View = layoutInflater.inflate(R.layout.overlay, null)
         wm.addView(view, params)
     }
+
+    fun onParallelGetButtonClick() = GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, {
+        val httpurl = "https://asia-northeast1-iconic-exchange-326112.cloudfunctions.net/online_you"
+        val res = POST(httpurl).await()
+
+        Log.d("responseget", res)
+    })
+
+    fun POST(url: String) : Deferred<String> = GlobalScope.async(
+        Dispatchers.Default,
+        CoroutineStart.DEFAULT,
+        {
+            val shardPreferences = getSharedPreferences("KEY", Context.MODE_PRIVATE)
+            val username = shardPreferences.getString("username", "Unknown")
+            val myid = shardPreferences.getString("uuid", "Unknown")
+            var respon = "null"
+            val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+            val requestAdapter = moshi.adapter(post::class.java)
+            val header: HashMap<String, String> = hashMapOf("Content-Type" to "application/json")
+            val pushtext = post(id = myid!!)
+            val httpAsync = url
+                .httpPost()
+                .header(header).body(requestAdapter.toJson(pushtext))
+                .responseString() { request, response, result ->
+                    Log.d("hoge", result.toString())
+                    when (result) {
+                        is Result.Failure -> {
+                            val ex = result.getException()
+                            Log.d("response", ex.toString())
+                        }
+                        is Result.Success -> {
+                            val data = result.get()
+                            Log.d("res", data.toString())
+                            onlinestate = data.toInt()
+                        }
+                    }
+                }
+            httpAsync.join()
+
+            return@async respon
+        })
+
+    data class post(
+        val id: String
+    )
 }
 
