@@ -82,13 +82,16 @@ class Service_friendstate : Service() {
         mTimer!!.schedule(object : TimerTask() {
             override fun run() {
                 val btnstate = shardPreferences.getString("btnstate", "0")
+                val gettime = shardPreferences.getString("picknumber", "2")
+                var timespan = gettime!!.toInt()
+                Log.d("span", timespan.toString())
                 mHandler.post {
                     Log.d("TestService", "Timerrunn!!!")
                     if (btnstate == "1"){
                         var a_time = LocalDateTime.now()
-                        val line = abs(a_time.minute - b_time.minute)
+                        val line = abs(a_time.hour - b_time.hour)
                         Log.d("line", line.toString())
-                        if (line >= 2) {
+                        if (line >= timespan) {
                             onParallelGetButtonClick()
                             b_time = a_time
                         }
