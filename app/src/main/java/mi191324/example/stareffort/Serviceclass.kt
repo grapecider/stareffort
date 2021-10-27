@@ -1,8 +1,6 @@
 package mi191324.example.stareffort
 
 import android.app.ActivityManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
@@ -15,13 +13,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.SurfaceView
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import androidx.annotation.RequiresApi
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
@@ -78,19 +71,31 @@ class Serviceclass : Service() {
         var b_time = LocalDateTime.now()
         var i = "out"
         var I = 0
+        //
+        val typeLayer = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        var windowManager = applicationContext
+            .getSystemService(WINDOW_SERVICE) as WindowManager
+        val paramss = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            typeLayer, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            PixelFormat.TRANSLUCENT
+        )
+        //
         val layoutInflater = LayoutInflater.from(this)
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_FULLSCREEN or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT
         )
-        val wm = applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        view = layoutInflater.inflate(R.layout.overlay, null)
-
+        val wm = applicationContext.getSystemService(WINDOW_SERVICE) as WindowManager
+        val nullParent: ViewGroup? = null
+        view = layoutInflater.inflate(R.layout.overlay, nullParent)
         mTimer = Timer(true)
         mTimer!!.schedule(object : TimerTask() {
             override fun run() {
@@ -122,7 +127,7 @@ class Serviceclass : Service() {
                     i = "out"
                 }
             }
-        }, 10000, 20000)
+        }, 10000, 10000)
         return START_STICKY
     }
 
