@@ -95,7 +95,7 @@ class Serviceclass : Service() {
         )
         val wm = applicationContext.getSystemService(WINDOW_SERVICE) as WindowManager
         val nullParent: ViewGroup? = null
-        view = layoutInflater.inflate(R.layout.overlay, nullParent)
+        view = layoutInflater.inflate(R.layout.overlay, null)
         mTimer = Timer(true)
         mTimer!!.schedule(object : TimerTask() {
             override fun run() {

@@ -20,28 +20,7 @@ class MyrecordActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_myrecord)
-
-        val btnBack :Button = findViewById(R.id.btnBack)
-
-        //戻るボタン（アクティビティの終了）
-        btnBack.setOnClickListener {
-            finish()
-        }
-        barList = ArrayList()
-        barList.add(BarEntry(1f, 500f))
-        barList.add(BarEntry(2f, 100f))
-        barList.add(BarEntry(3f, 300f))
-        barList.add(BarEntry(4f, 800f))
-        barList.add(BarEntry(5f, 400f))
-        barList.add(BarEntry(6f, 1000f))
-        barList.add(BarEntry(7f, 800f))
-        barDataSet = BarDataSet(barList, "Population")
-        barData = BarData(barDataSet)
-        barChart.data = barData
-        barDataSet.setColors(ColorTemplate.JOYFUL_COLORS, 250)
-        barDataSet.valueTextColor = Color.BLACK
-        barDataSet.valueTextSize = 15f
+        setContentView(R.layout.overlay)
 
     }
 }
