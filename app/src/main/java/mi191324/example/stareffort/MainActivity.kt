@@ -1,16 +1,23 @@
 package mi191324.example.stareffort
 
+import android.Manifest
 import android.app.AppOpsManager
+import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.*
 import android.provider.Settings
+import android.provider.Settings.canDrawOverlays
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.kittinunf.fuel.httpPost
@@ -23,10 +30,10 @@ import kotlinx.android.synthetic.main.activity_homeapp.*
 import kotlinx.coroutines.*
 import java.lang.Runnable
 import java.util.*
-import kotlin.concurrent.thread
 
 
 class MainActivity : AppCompatActivity() {
+    val REQUEST_PERMISSION = 123
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,30 +52,19 @@ class MainActivity : AppCompatActivity() {
         Log.d("idlist", idlist)
 
         //permission許可
-        if (isaccessGranted()){
-            Log.d("permission", "OK")
-        }else{
-            Log.d("permission", "NO")
-            val dialog1 = AlertDialog.Builder(this)
-                .setTitle("permission許可") // タイトル
-                .setMessage("オーバーレイの設定を許可するために\n設定画面でこのアプリの許可をしてください") // メッセージ
-                .setPositiveButton("OK") { dialog, which -> // OK
-                    var intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-                    startActivity(intent)
-                }
-                .create()
-            // AlertDialogを表示
-            dialog1.show()
-            val dialog2 = AlertDialog.Builder(this)
-                .setTitle("permission許可") // タイトル
-                .setMessage("次に他のアプリ情報取得を許可するために\n設定画面でこのアプリの許可をしてください") // メッセージ
-                .setPositiveButton("OK") { dialog, which -> // OK
-                    intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-                    startActivity(intent)
-                }
-                .create()
-            // AlertDialogを表示
-            dialog2.show()
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED) {
+                Log.d("PACKAGE_USAGE_STATS", "OK")
+            } else {
+                Log.d("PACKAGE_USAGE_STATS", "NO")
+                showAlertDialog(supportFragmentManager, Manifest.permission.PACKAGE_USAGE_STATS)
+            }
+            if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW) == PackageManager.PERMISSION_GRANTED) {
+                Log.d("SYSTEM_ALERT_WINDOW", "OK")
+            } else {
+                Log.d("SYSTEM_ALERT_WINDOW", "NO")
+                showAlertDialog(supportFragmentManager, Manifest.permission.SYSTEM_ALERT_WINDOW)
+            }
         }
 
         //初回起動のための変数
@@ -79,8 +75,8 @@ class MainActivity : AppCompatActivity() {
 
         if (preference.getBoolean("Laun", false)==false) {
             //初回起動時の処理
-            val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            startActivity(intent)
+            //val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            //startActivity(intent)
             Log.d("TAG", "初回起動")
             editor.putBoolean("Laun", true)
             editor.commit()
@@ -137,9 +133,7 @@ class MainActivity : AppCompatActivity() {
 
         //friendrecordボタンを押したら友達の状態再取得
         friendrecord.setOnClickListener {
-            //stopService(Intent(this@MainActivity, Serviceclass::class.java))
             onParallelGetButtonClick()
-            //startService(Intent(this@MainActivity, Serviceclass::class.java))
         }
         //4）settingボタンを押したら設定画面(SettingActivity)へ
         setting.setOnClickListener {
@@ -307,15 +301,45 @@ class MainActivity : AppCompatActivity() {
             return@async respon
         })
 
-    fun recycleview(getres: statelistresponce?){
-        Log.d("getres", getres.toString())
-        val recycle: RecyclerView = findViewById(R.id.recycle)
-        //val handler = Handler()
-        runOnUiThread(Runnable() {
-            run() {
-                recycle.adapter = statelistAdapter(getres!!.response)
+
+    //ssss
+    fun showAlertDialog(fragmentManager: FragmentManager, permission: String) {
+        val dialog = RuntimePermissionAlertDialogFragment.newInstance(permission)
+        dialog.show(fragmentManager, RuntimePermissionAlertDialogFragment.TAG)
+    }
+
+    // ダイアログ本体
+    class RuntimePermissionAlertDialogFragment : DialogFragment() {
+
+        companion object {
+            const val TAG = "RuntimePermissionApplicationSettingsDialogFragment"
+            private const val ARG_PERMISSION_NAME = "permissionName"
+            fun newInstance(permission: String): RuntimePermissionAlertDialogFragment {
+                val fragment = RuntimePermissionAlertDialogFragment()
+                val args = Bundle()
+                args.putString(ARG_PERMISSION_NAME, permission)
+                fragment.arguments = args
+                return fragment
             }
-        })
+        }
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            val permission = arguments?.getString(ARG_PERMISSION_NAME)
+            val dialogBuilder = AlertDialog.Builder(requireContext())
+                .setMessage(permission!! + "の権限がないので、アプリ情報の「許可」から設定してください")
+                .setPositiveButton("アプリ情報", DialogInterface.OnClickListener { _, _ ->
+                    dismiss()
+                    // システムのアプリ設定画面
+                    val intent = Intent(
+                        android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:" + activity?.packageName)
+                    )
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    activity?.startActivity(intent)
+                })
+                .setNegativeButton("キャンセル", DialogInterface.OnClickListener { _, _ -> dismiss() })
+            return dialogBuilder.create()
+        }
     }
 
     data class userlist(
@@ -337,4 +361,5 @@ class MainActivity : AppCompatActivity() {
     data class statelistresponce(
         val response: List<statelist>
     )
+
 }
