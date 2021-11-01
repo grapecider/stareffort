@@ -89,7 +89,7 @@ class lockActivity : AppCompatActivity(){
                 val icon = loadAppIcon(allapps[i])
                 val packageName = appInfo.packageName
                 Log.d("jj", packageName.toString())
-                var judgment = true
+                var judgment = false
                 while (I < NameList.size) {
                     if (appname.toString() == NameList.get(I)) {
                         I++
@@ -103,9 +103,14 @@ class lockActivity : AppCompatActivity(){
                     I = I + 2
                 }
                 val oneapp = AppInfo(icon, appname, judgment)
-                appInfolist.add(oneapp)
-                saveapp.add(appname.toString())
-                saveapp.add(judgment.toString())
+                if (appname != "stareffort") {
+                    appInfolist.add(oneapp)
+                }
+
+                if (appname != "stareffort") {
+                    saveapp.add(appname.toString())
+                    saveapp.add(judgment.toString())
+                }
             }
             I = 0
             i += 1

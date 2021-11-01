@@ -8,17 +8,21 @@
 
     <Button
         android:id="@+id/returnBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginLeft="50dp"
+        android:layout_width="120dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
         android:layout_marginTop="20dp"
-        android:layout_marginEnd="300dp"
-        android:layout_marginRight="300dp"
-        android:text="戻る"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:background="#FBD1D7"
+        android:drawableStart="@drawable/leftside_24"
+        android:text="もどる"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:textStyle="normal|bold"
+        app:layout_constraintEnd_toStartOf="@+id/setting"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/idtxt"
@@ -26,14 +30,18 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
         android:layout_marginLeft="100dp"
+        android:layout_marginTop="90dp"
         android:layout_marginEnd="100dp"
         android:layout_marginRight="100dp"
         android:layout_marginBottom="150dp"
         android:text="ID"
+        android:textColor="#5E5E5E"
         android:textSize="30dp"
+        android:textStyle="normal|bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/changeBtn" />
 
     <TextView
         android:id="@+id/nametxt"
@@ -41,22 +49,28 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
         android:layout_marginLeft="100dp"
+        android:layout_marginTop="150dp"
         android:layout_marginEnd="100dp"
         android:layout_marginRight="100dp"
-        android:layout_marginBottom="250dp"
         android:text="username"
-        android:textSize="30dp"
-        app:layout_constraintBottom_toTopOf="@+id/idtxt"
+        android:textColor="#5E5E5E"
+        android:textSize="35dp"
+        android:textStyle="normal|bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/changeBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
+        android:layout_width="120dp"
+        android:layout_height="60dp"
+        android:layout_marginTop="150dp"
         android:layout_marginBottom="30dp"
+        android:background="#F1BAC4"
         android:text="名前変更"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:textStyle="normal|bold"
         app:layout_constraintBottom_toTopOf="@+id/idtxt"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

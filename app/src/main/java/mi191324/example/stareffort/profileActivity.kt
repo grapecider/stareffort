@@ -3,7 +3,9 @@ package mi191324.example.stareffort
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Paint
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -11,14 +13,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import android.preference.PreferenceManager
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
-import com.google.gson.Gson
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
-import org.w3c.dom.Text
-import java.util.HashMap
+import java.util.*
 
 class profileActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,12 +85,14 @@ class profileActivity : AppCompatActivity(){
                 finish()
                 val intent = Intent(this, profileActivity::class.java)
                 startActivity(intent)
-                })
+            })
             dialog.setNegativeButton("キャンセル", null)
             dialog.show()
         }
+        idtxt.setPaintFlags(idtxt.getPaintFlags() or Paint.UNDERLINE_TEXT_FLAG)
         idtxt.setText(idset)
-        nametxt.setText(username)
+        nametxt.setPaintFlags(nametxt.getPaintFlags() or Paint.UNDERLINE_TEXT_FLAG)
+        nametxt.setText("名前:" + username)
         val last = shardPreferences.getString("last", "0")
         if (last == "1"){
             Toast.makeText(this, "名前変更しました", Toast.LENGTH_LONG).show()
@@ -110,7 +111,7 @@ class profileActivity : AppCompatActivity(){
         }
     }
 
-    data class userlist (
+    data class userlist(
         val id: String,
         val name: String
     )
