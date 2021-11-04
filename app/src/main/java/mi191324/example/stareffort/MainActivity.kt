@@ -2,7 +2,6 @@ package mi191324.example.stareffort
 
 import android.Manifest
 import android.app.AppOpsManager
-import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -10,14 +9,14 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
-import android.provider.Settings.canDrawOverlays
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentManager
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.kittinunf.fuel.httpPost
@@ -33,8 +32,14 @@ import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
-    val REQUEST_PERMISSION = 123
+    private val view: View? = null
+    private val REQUEST_CODE = 100
+    private val mPermission = arrayOf(
+        Manifest.permission.PACKAGE_USAGE_STATS,
+        Manifest.permission.SYSTEM_ALERT_WINDOW
+    )
 
+    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -44,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         val edit = shardPreferences.edit()
         var idpush = shardPreferences.getString("idpush", "0")
         val username = shardPreferences.getString("username", "Unknown")
-        val recycle:RecyclerView = findViewById(R.id.recycle)
+        //val recycle:RecyclerView = findViewById(R.id.recycle)
         val friendrecord: Button = findViewById(R.id.friendsrecord)
         val setting: Button = findViewById(R.id.setting)
 
@@ -52,20 +57,45 @@ class MainActivity : AppCompatActivity() {
         Log.d("idlist", idlist)
 
         //permission許可
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED) {
-                Log.d("PACKAGE_USAGE_STATS", "OK")
-            } else {
-                Log.d("PACKAGE_USAGE_STATS", "NO")
-                showAlertDialog(supportFragmentManager, Manifest.permission.PACKAGE_USAGE_STATS)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val permissionCheck1 = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.PACKAGE_USAGE_STATS
+            )
+            val usagejudge = checkReadStatsPermission()
+            Log.d("judge", usagejudge.toString())
+
+            if (usagejudge == false) {
+                if (permissionCheck1 != PackageManager.PERMISSION_GRANTED) {
+                    //if (isOverlayGranted()) return
+                    val dialogBuilder1 = AlertDialog.Builder(this)
+                        .setMessage("他アプリの情報を見る権限がないので、\nアプリ情報の「許可」から設定してください")
+                        .setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                            // システムのアプリ設定画面
+                            val intent = Intent(
+                                Settings.ACTION_USAGE_ACCESS_SETTINGS,
+                                Uri.parse("package:$packageName")
+                            )
+                            startActivityForResult(intent, REQUEST_CODE)
+                        })
+                    dialogBuilder1.show()
+                }
             }
-            if (checkSelfPermission(Manifest.permission.SYSTEM_ALERT_WINDOW) == PackageManager.PERMISSION_GRANTED) {
-                Log.d("SYSTEM_ALERT_WINDOW", "OK")
-            } else {
-                Log.d("SYSTEM_ALERT_WINDOW", "NO")
-                showAlertDialog(supportFragmentManager, Manifest.permission.SYSTEM_ALERT_WINDOW)
-            }
+
+            if (isOverlayGranted()) return
+            val dialogBuilder = AlertDialog.Builder(this)
+                .setMessage("オーバーレイの権限がないので、\nアプリ情報の「許可」から設定してください")
+                .setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                    // システムのアプリ設定画面
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
+                    startActivityForResult(intent, REQUEST_CODE)
+                })
+            dialogBuilder.show()
         }
+
 
         //初回起動のための変数
         var preference = getSharedPreferences("Preference Name", MODE_PRIVATE)
@@ -153,6 +183,27 @@ class MainActivity : AppCompatActivity() {
 
 
         Log.d("firstpush", idpush + username)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        Log.d("request", requestCode.toString())
+        Log.d("permissions", permissions.toString())
+        Log.d("grant", grantResults.toString())
+        when (requestCode) {
+            REQUEST_CODE -> {
+                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("permission", "miss")
+                } else {
+                    // パーミッションが得られなかった時
+                    // 処理を中断する・エラーメッセージを出す・アプリケーションを終了する等
+                }
+            }
+        }
     }
 
     //IDを作成する関数
@@ -301,47 +352,6 @@ class MainActivity : AppCompatActivity() {
             return@async respon
         })
 
-
-    //ssss
-    fun showAlertDialog(fragmentManager: FragmentManager, permission: String) {
-        val dialog = RuntimePermissionAlertDialogFragment.newInstance(permission)
-        dialog.show(fragmentManager, RuntimePermissionAlertDialogFragment.TAG)
-    }
-
-    // ダイアログ本体
-    class RuntimePermissionAlertDialogFragment : DialogFragment() {
-
-        companion object {
-            const val TAG = "RuntimePermissionApplicationSettingsDialogFragment"
-            private const val ARG_PERMISSION_NAME = "permissionName"
-            fun newInstance(permission: String): RuntimePermissionAlertDialogFragment {
-                val fragment = RuntimePermissionAlertDialogFragment()
-                val args = Bundle()
-                args.putString(ARG_PERMISSION_NAME, permission)
-                fragment.arguments = args
-                return fragment
-            }
-        }
-
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            val permission = arguments?.getString(ARG_PERMISSION_NAME)
-            val dialogBuilder = AlertDialog.Builder(requireContext())
-                .setMessage(permission!! + "の権限がないので、アプリ情報の「許可」から設定してください")
-                .setPositiveButton("アプリ情報", DialogInterface.OnClickListener { _, _ ->
-                    dismiss()
-                    // システムのアプリ設定画面
-                    val intent = Intent(
-                        android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + activity?.packageName)
-                    )
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    activity?.startActivity(intent)
-                })
-                .setNegativeButton("キャンセル", DialogInterface.OnClickListener { _, _ -> dismiss() })
-            return dialogBuilder.create()
-        }
-    }
-
     data class userlist(
         val id: String,
         val user: String
@@ -362,4 +372,35 @@ class MainActivity : AppCompatActivity() {
         val response: List<statelist>
     )
 
+    private fun isOverlayGranted() = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(
+        this
+    )
+
+    //private fun isAppGranted() = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.(this)
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE) {
+            if (!isOverlayGranted()) {
+                Log.d("雑魚otu", "^^")
+            } else {
+                Log.d("成功", "^^")
+            }
+        }
+    }
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    private fun checkReadStatsPermission(): Boolean {
+        val aom = getSystemService(APP_OPS_SERVICE) as AppOpsManager
+        val mode = aom.checkOp(
+            AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(),
+            packageName
+        )
+        return if (mode == AppOpsManager.MODE_DEFAULT) {
+            checkPermission(
+                "android.permission.PACKAGE_USAGE_STATS",
+                Process.myPid(),
+                Process.myUid()
+            ) == PackageManager.PERMISSION_GRANTED
+        } else mode == AppOpsManager.MODE_ALLOWED
+    }
 }
