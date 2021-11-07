@@ -13,7 +13,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="20dp"
-        android:background="#FBD1D7"
+        android:background="#DF929C"
         android:drawableStart="@drawable/leftside_24"
         android:text="もどる"
         android:textColor="#FFFFFF"

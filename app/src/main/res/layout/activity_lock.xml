@@ -7,17 +7,21 @@
 
     <Button
         android:id="@+id/returnBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginLeft="40dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="280dp"
-        android:layout_marginRight="280dp"
-        android:text="戻る"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="120dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:background="#DF929C"
+        android:drawableStart="@drawable/leftside_24"
+        android:text="もどる"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp"
+        android:textStyle="normal|bold"
+        app:layout_constraintEnd_toStartOf="@+id/setting"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints" />
 
     <ListView
         android:id="@+id/list_view"

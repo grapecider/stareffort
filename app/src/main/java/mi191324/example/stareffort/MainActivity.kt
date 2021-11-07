@@ -32,14 +32,8 @@ import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
-    private val view: View? = null
     private val REQUEST_CODE = 100
-    private val mPermission = arrayOf(
-        Manifest.permission.PACKAGE_USAGE_STATS,
-        Manifest.permission.SYSTEM_ALERT_WINDOW
-    )
 
-    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -55,6 +49,7 @@ class MainActivity : AppCompatActivity() {
 
         val idlist = shardPreferences.getString("idlist", "[]")
         Log.d("idlist", idlist)
+
 
         //permission許可
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -81,19 +76,35 @@ class MainActivity : AppCompatActivity() {
                     dialogBuilder1.show()
                 }
             }
+            val ffff = isOverlayGranted()
+            Log.d("ffff", ffff.toString())
 
-            if (isOverlayGranted()) return
-            val dialogBuilder = AlertDialog.Builder(this)
-                .setMessage("オーバーレイの権限がないので、\nアプリ情報の「許可」から設定してください")
-                .setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
-                    // システムのアプリ設定画面
-                    val intent = Intent(
-                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:$packageName")
-                    )
-                    startActivityForResult(intent, REQUEST_CODE)
-                })
-            dialogBuilder.show()
+            if (ffff == false) {
+                val dialogBuilder1 = AlertDialog.Builder(this)
+                    .setMessage("オーバーレイの権限がないので、\nアプリ情報の「許可」から設定してください")
+                    .setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                        // システムのアプリ設定画面
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:$packageName")
+                        )
+                        startActivityForResult(intent, REQUEST_CODE)
+                    })
+                dialogBuilder1.show()
+                /*
+                val dialogBuilder = AlertDialog.Builder(this)
+                    .setMessage("オーバーレイの権限がないので、\nアプリ情報の「許可」から設定してください")
+                    .setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                        // システムのアプリ設定画面
+                        val intent = Intent(
+                            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:$packageName")
+                        )
+                        startActivityForResult(intent, REQUEST_CODE)
+                    })
+                dialogBuilder.show()
+                 */
+            }
         }
 
 
@@ -394,6 +405,20 @@ class MainActivity : AppCompatActivity() {
         val mode = aom.checkOp(
             AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(),
             packageName
+        )
+        return if (mode == AppOpsManager.MODE_DEFAULT) {
+            checkPermission(
+                "android.permission.PACKAGE_USAGE_STATS",
+                Process.myPid(),
+                Process.myUid()
+            ) == PackageManager.PERMISSION_GRANTED
+        } else mode == AppOpsManager.MODE_ALLOWED
+    }
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    private fun checkOverlayPermission(): Boolean {
+        val aom = getSystemService(APP_OPS_SERVICE) as AppOpsManager
+        val mode = aom.checkOp(
+            AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW, Process.myUid(), packageName
         )
         return if (mode == AppOpsManager.MODE_DEFAULT) {
             checkPermission(
